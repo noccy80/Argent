@@ -6,7 +6,7 @@
 
 function btnStart_click() {
 	$.ajax({
-		url:"http://gradysghost.doesntexist.com:12321",
+		url:"http://localhost:12321",
 		type:"GET",
 		dataType:"json",
 		data:{
@@ -23,7 +23,7 @@ function btnStart_click() {
 
 function btnSet_click() {
 	$.ajax({
-		url:"http://gradysghost.doesntexist.com:12321",
+		url:"http://localhost:12321",
 		type:"GET",
 		dataType:"json",
 		data:{
@@ -42,7 +42,7 @@ function btnSet_click() {
 
 function btnGet_click() {
 	$.ajax({
-		url:"http://gradysghost.doesntexist.com:12321",
+		url:"http://localhost:12321",
 		type:"GET",
 		dataType:"json",
 		data:{
