@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Session Test</title>
+		<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+		<link rel="stylesheet" type="text/css" href="style/style.css" />
+		<script type="text/javascript" src="js/jquery.js"></script>
+		<script type="text/javascript" src="js/handlers.js"></script>
+	</head>
+	<body>
+		<h1>Session Test</h1>
+		<hr />
+		<h2>1. Start Session</h2>
+		<p class="centered">
+			<a class="button" href="#" id="btnStart" onclick="btnStart_click()">Start</a>
+		</p>
+		<p class="centered" id="pSid" />
+		<hr />
+		<h2>2. Set Data</h2>
+		<p class="centered">
+			<label for="txtKey">Key:</label>
+			<input type="text" id="txtKey" value="demoKey" />
+		</p>
+		<p class="centered">
+			<label for="txtData">Data:</label>
+			<input type="text" id="txtData" value="Demo data" />
+		</p>
+		<p class="centered">
+			<a href="#" class="button" id="btnSet" onclick="btnSet_click()">Set</a>
+		</p>
+		<hr />
+		<h2>3. Retrieve Data</h2>
+		<p class="centered">
+			<label for="txtKeyGet">Key:</label>
+			<input type="text" id="txtKeyGet" value="demoKey" />
+		</p>
+		<p class="centered">
+			<a href="#" class="button" id="btnGet" onclick="btnGet_click()">Retrieve</a>
+		</p>
+		<p class="centered" id="pGet" />
+	</body>
+</html>
