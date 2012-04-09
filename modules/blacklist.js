@@ -25,8 +25,11 @@ var blacklist = {
 			if (this.config.whitelist_behavior)
 				return true;
 			return "IP address " + r.connection.remoteAddress + " is blacklisted.";
+		} else {
+			if (this.config.whitelist_behavior)
+				return "IP address " + r.connection.remoteAddress + " is not whitelisted.";
+			return true;
 		}
-		return true;
 	},
 
 	shutdown:function(){},
