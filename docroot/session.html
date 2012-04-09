@@ -10,12 +10,14 @@
 	<body>
 		<h1>Session Test</h1>
 		<hr />
+		<a name="start" />
 		<h2>1. Start Session</h2>
 		<p class="centered">
-			<a class="button" href="#" id="btnStart" onclick="btnStart_click()">Start</a>
+			<a class="button" href="#start" id="btnStart" onclick="btnStart_click()">Start</a>
 		</p>
 		<p class="centered" id="pSid" />
 		<hr />
+		<a name="set" />
 		<h2>2. Set Data</h2>
 		<p class="centered">
 			<label for="txtKey">Key:</label>
@@ -26,16 +28,17 @@
 			<input type="text" id="txtData" value="Demo data" />
 		</p>
 		<p class="centered">
-			<a href="#" class="button" id="btnSet" onclick="btnSet_click()">Set</a>
+			<a href="#set" class="button" id="btnSet" onclick="btnSet_click()">Set</a>
 		</p>
 		<hr />
+		<a name="retrieve" />
 		<h2>3. Retrieve Data</h2>
 		<p class="centered">
 			<label for="txtKeyGet">Key:</label>
 			<input type="text" id="txtKeyGet" value="demoKey" />
 		</p>
 		<p class="centered">
-			<a href="#" class="button" id="btnGet" onclick="btnGet_click()">Retrieve</a>
+			<a href="#retrieve" class="button" id="btnGet" onclick="btnGet_click()">Retrieve</a>
 		</p>
 		<p class="centered" id="pGet" />
 	</body>

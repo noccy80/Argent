@@ -9,6 +9,7 @@ sys.http = {};
 sys.http.http = require('http');
 sys.http.url = require('url');
 sys.fs = require('fs');
+sys.path = require('path');
 
 // Set up basic module framework
 GLOBAL.mods = {};
@@ -24,10 +25,11 @@ sys.handleAction = function(r, u, q) {
 	sys.logger.stdout("Action request\n\tModule: " + moduleName + "\n\tAction: " + action + "\n\tParameters: " + u.search);
 	sys.logger.stdout(JSON.stringify(q));
 	if (eval("sys.handlers['" + moduleName + "']")) {
-			eval("var handler = sys.handlers['" + moduleName + "']");
+		eval("var handler = sys.handlers['" + moduleName + "']");
 		
 		if (handler.handlesAction(action)) {
 			ret = handler.handle(action, r, q);
+			sys.logger.stdout(JSON.stringify(ret));
 			ret.headers['content-length'] = JSON.stringify(ret.response).length;
 			sys.logger.stdout("Response: " + JSON.stringify(ret.response));
 		} else {	// Module can't handle the action, much like your mom
@@ -66,7 +68,7 @@ sys.isBinaryType = function(mimetype, table) {
 try {
 
 	// Read the conf file and initialize the expected variables
-	var _confContent = sys.fs.readFileSync("./httpd.conf", "UTF-8").split('\n');
+	var _confContent = sys.fs.readFileSync("./conf/httpd.conf", "UTF-8").split('\n');
 	var _defaultFile = "";
 	var _defaultMimeType = "";
 	var _documentRoot = "";
@@ -130,7 +132,10 @@ try {
 	// Remove potential postslash from the docroot
 	if (_documentRoot.substring(_documentRoot.length - 2) == "/")
 		_documentRoot = _documentRoot.substring(_documentRoot.length - 2);
-
+	
+	// Initialize all modules
+	for (var i in mods)
+		mods[i].init();
 
 	sys.http.http.createServer(function (request, response) {
 		// Initialize things...
@@ -144,41 +149,55 @@ try {
 			var parts = cookie.split('=');
 			query.cookies[parts[0].trim()] = (parts[1] || '').trim();
 		});
-		
-		// Actions always override file requests
-		if (query.action) {
-			var ret = sys.handleAction(request, u, query);
-			response.writeHead(200, ret.headers);
-			response.end(JSON.stringify(ret.response));
-		} else {	// We got no action
-			// No filename? Use the default.
-			if (filename == null || filename == "" || filename == "/") filename = _defaultFile;
-			if (filename.charAt(0) == '/') filename = filename.substring(1);
-			filename = _documentRoot + "/" + filename;
-			mimetype = sys.getMimeType(filename, _exts);
-			if (mimetype == null) mimetype = _defaultMimeType;
-			sys.logger.stdout("Request: " + request.url + " -> " + filename + " (" + mimetype + ")");
-			
-			try {
-				var body = sys.fs.readFileSync(filename);
-				
-				// Write out document
-				response.writeHead(200,
-					{
-						'Content-Type': mimetype,
-						'Content-Length': body.length
-					}
-				);
-				if (sys.isBinaryType(mimetype, _bins)) {
-					response.end(body, 'binary');
-				} else {
-					response.end(body);
-				}
-			} catch (e) {	// Bad file?
-				sys.logger.stderr(e);
-				sys.logger.stderr("[ERR] Error serving request for " + filename);
-				response.writeHead(404, {});
+	
+		var errors = new Array();	
+		for (var i in mods) {
+			var cont = mods[i].receiveRequest(request, u, query);
+			if (cont !== true) {
+				errors.push(cont);
 			}
+		}
+
+		if (errors.length == 0) {
+			// Actions always override file requests
+			if (query.action) {
+				var ret = sys.handleAction(request, u, query);
+				response.writeHead(200, ret.headers);
+				response.end(JSON.stringify(ret.response));
+			} else {	// We got no action
+				// No filename? Use the default.
+				if (filename == null || filename == "" || filename == "/") filename = _defaultFile;
+				if (filename.charAt(0) == '/') filename = filename.substring(1);
+				filename = _documentRoot + "/" + filename;
+				mimetype = sys.getMimeType(filename, _exts);
+				if (mimetype == null) mimetype = _defaultMimeType;
+				sys.logger.stdout("Request from " + request.connection.remoteAddress + ": " + request.url + " -> " + filename + " (" + mimetype + ")");
+			
+				try {
+					var body = sys.fs.readFileSync(filename);
+				
+					// Write out document
+					response.writeHead(200,
+						{
+							'Content-Type': mimetype,
+							'Content-Length': body.length
+						}
+					);
+					if (sys.isBinaryType(mimetype, _bins)) {
+						response.end(body, 'binary');
+					} else {
+						response.end(body);
+					}
+				} catch (e) {	// Bad file?
+					sys.logger.stderr(e);
+					sys.logger.stderr("[ERR] Error serving request for " + filename);
+					response.writeHead(404, {});
+				}
+			}
+		} else {
+			sys.logger.stderr("Could not serve request due to the following errors:");
+			for (var i in errors)
+				sys.logger.stderr("\t" + errors[i]);
 		}
 	}).listen(_listenPort);
 	

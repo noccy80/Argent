@@ -6,7 +6,7 @@
 
 function btnStart_click() {
 	$.ajax({
-		url:"http://localhost:12321",
+		url:ajaxUrl,
 		type:"GET",
 		dataType:"json",
 		data:{
@@ -16,14 +16,14 @@ function btnStart_click() {
 			$("#pSid").text("Session ID: " + data.sid);
 		},
 		error:function(xhr, status, error) {
-			alert(error);
+			alert(error + "\n" + status + "\n" + JSON.stringify(xhr));
 		}
 	});
 }
 
 function btnSet_click() {
 	$.ajax({
-		url:"http://localhost:12321",
+		url:ajaxUrl,
 		type:"GET",
 		dataType:"json",
 		data:{
@@ -42,7 +42,7 @@ function btnSet_click() {
 
 function btnGet_click() {
 	$.ajax({
-		url:"http://localhost:12321",
+		url:ajaxUrl,
 		type:"GET",
 		dataType:"json",
 		data:{
@@ -57,3 +57,56 @@ function btnGet_click() {
 		}
 	});
 }
+
+function btnSave_click() {
+	$.ajax({
+		url:ajaxUrl,
+		type:"GET",
+		dataType:"json",
+		data:{
+			"action":"session@savecache"
+		},
+		success:function(data, status, xhr) {
+			$("#pStatus").text("Saved the session cache to disk.");
+		},
+		error:function(xhr, status, error) {
+			$("#pStatus").text("Error saving the session cache.");
+		}
+	});
+}
+
+function btnSnapshot_click() {
+	$.ajax({
+		url:ajaxUrl,
+		type:"GET",
+		dataType:"json",
+		data:{
+			"action":"session@savesnapshot",
+			"label":$("#txtLabel").val()
+		},
+		success:function(data, status, xhr) {
+			$("#pStatus").text("Saved the snapshot.");
+		},
+		error:function(xhr, status, error) {
+			$("#pStatus").text("Error saving the snapshot.");
+		}
+	});
+}
+
+function btnClearCache_click() {
+
+}
+
+function btnClearSnapshot_click() {
+
+}
+
+function btnLoad_click() {
+
+}
+
+function btnRestore_click() {
+
+}
+
+var ajaxUrl = "http://gradysghost.doesntexist.com:12321";

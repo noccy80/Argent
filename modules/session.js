@@ -11,13 +11,21 @@ var session = {
 		disable_get:false,
 		disable_set:false,
 		renew_on_set:false,
-		renew_on_get:false
+		renew_on_get:false,
+		snapshot_file:"./session.sav",
+		snapshot_on_exit:true,
+		disable_snapshot_api:true
 	},
 	
 	session:{},
 
-
 	/* GLOBAL FUNCTIONS */
+	
+	init:function(){},
+	
+	receiveRequest:function(r, u, q){return true;},
+	
+	shutdown:function(){},
 	 
 	// Initializes a new session
 	start:function(id) {
@@ -97,7 +105,7 @@ var session = {
 			return this.start(0);
 		}
 	},
-
+	
 	// Generates a single valid character
 	generateSessionIdChar:function() {
 		var alphabet = [

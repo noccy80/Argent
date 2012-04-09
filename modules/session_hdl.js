@@ -49,6 +49,30 @@ mods.session.handler = {
 						"sid=" + renewData.sid + ";expires=" + renewData.expires;
 				}
 				break;
+			case "savecache":
+				this.resp.response = {"ack":true};
+				mods.session.saveCache();
+				break;
+			case "savesnapshot":
+				this.resp.response = {"ack":true};
+				mods.session.saveSnapshot(q.label);
+				break;
+			case "clearcache":
+				this.resp.response = {"ack":true};
+				mods.session.clearCache();
+				break;
+			case "clearsnapshot":
+				this.resp.response = {"ack":true};
+				mods.session.clearSnapshot(q.label);
+				break;
+			case "restore":
+				this.resp.response = {"ack":true};
+				mods.session.restore();
+				break;
+			case "restoreFrom":
+				this.resp.response = {"ack":true};
+				mods.sessions.restoreFrom(q.label);
+				break;
 			default:
 				return null;
 		}
