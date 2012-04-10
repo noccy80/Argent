@@ -8,7 +8,7 @@
 body, html	{ background-color:#fff; color:#000; font-family:"Droid Serif", "Times New Roman", serif;
 			  font-size:20pt; }
 h1, h2		{ text-align:center; }
-p 			{ text-align:center; }
+p 			{ color:black; }
 input		{ border:2px solid #ccc; padding:6px; font-family:"Droid Serif"; font-size:14pt;
 			  border-radius:6px; text-align:center; }
 input:hover	{ border-color:#999; }
@@ -23,3 +23,4 @@ hr			{ height:2px; width:25%; color:#444; background-color:#444; border:none; }
 a.button	{ text-decoration:none; padding:6px; border-radius:6px; border:2px solid #000;
 			  border-radius:6px; background-color:#ccc; }
 a.button:hover	{ color:#000; background-color:#bbb; }
+div.marginalized { width:800px; float:none; margin:0 auto; }

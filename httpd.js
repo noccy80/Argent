@@ -165,9 +165,18 @@ try {
 				response.writeHead(200, ret.headers);
 				response.end(JSON.stringify(ret.response));
 			} else {	// We got no action
-				// No filename? Use the default.
-				if (filename == null || filename == "" || filename == "/") filename = _defaultFile;
-				if (filename.charAt(0) == '/') filename = filename.substring(1);
+				// Work over the filename to retrieve
+				fnameParts = filename.split('/');
+				if (fnameParts[fnameParts.length - 1].indexOf('.') == -1) { // There is no . in the filename part of the path
+					// Append a trailing slash if it's not there
+					if (filename.charAt(filename.length - 1) != '/') {
+						filename += '/';
+						response.writeHead(302, {"Location":filename});
+						response.end("");
+					}
+					// If there's still no filename, add the default
+					if (filename.charAt(filename.length - 1) == '/') filename += _defaultFile;
+				}
 				filename = _documentRoot + "/" + filename;
 				mimetype = sys.getMimeType(filename, _exts);
 				if (mimetype == null) mimetype = _defaultMimeType;
