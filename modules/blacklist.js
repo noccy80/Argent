@@ -13,6 +13,7 @@ var blacklist = {
 	init:function(){
 		this.reload();
 		sys.logger.stdout("Blacklist module initialized");
+		return 1;
 	},
 
 	receiveRequest:function(r, u, q){
@@ -24,10 +25,10 @@ var blacklist = {
 		if (inList) {
 			if (this.config.whitelist_behavior)
 				return true;
-			return "IP address " + r.connection.remoteAddress + " is blacklisted.";
+			return {"httpcode":403, "message":"IP address " + r.connection.remoteAddress + " is blacklisted."};
 		} else {
 			if (this.config.whitelist_behavior)
-				return "IP address " + r.connection.remoteAddress + " is not whitelisted.";
+				return {"http-code":403, "message":"IP address " + r.connection.remoteAddress + " is not whitelisted."};
 			return true;
 		}
 	},

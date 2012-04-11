@@ -1,6 +1,9 @@
-When init() returns a string, return a 500.
 Admin module with graceful shutdown procedure. Update 02.html.
+
+DONE (STILL NEEDS DOCUMENTATION UPDATE)
+When init() returns a string, return a 500.
 Add 404 response when page cannot be found.
-Add config and logic for custom error pages.
 Ensure that receiveRequest functions can determine the error code returned.
+Add config and logic for custom error pages. Update 04.html.
 Verify that sys.handlers["myModule"] is synonymous with sys.handlers.myModule. Update 03.html.
+

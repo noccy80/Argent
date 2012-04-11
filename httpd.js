@@ -76,6 +76,7 @@ try {
 	var _moduleDir = "";
 	var _exts = new Array();
 	var _bins = new Array();
+	var _errorDocs = {};
 
 	// Look at each line of the conf file
 	for (var i = 0; i < _confContent.length; ++i) {
@@ -126,16 +127,27 @@ try {
 				sys.logger.stdout("Setting variable: " + varparts[0] + " = " + varparts[1]);
 				eval(varparts[0] + " = " + varparts[1] + ";");
 			}
+			
+			// Set an error document
+			if (pair[0] == "error_document") {
+				var edocparts = pair[1].split(',');
+				eval("_errorDocs.e" + edocparts[0] + " = \"" + edocparts[1] + "\";");
+				sys.logger.stdout("Setting error document for error " + edocparts[0] + " to " + edocparts[1]);
+			}
 		}
 	}
-
+	
 	// Remove potential postslash from the docroot
 	if (_documentRoot.substring(_documentRoot.length - 2) == "/")
 		_documentRoot = _documentRoot.substring(_documentRoot.length - 2);
 	
 	// Initialize all modules
-	for (var i in mods)
-		mods[i].init();
+	for (var i in mods) {
+		var initCode = mods[i].init();
+		if (initCode != 1) {
+			exit(initCode);
+		}
+	}
 
 	sys.http.http.createServer(function (request, response) {
 		// Initialize things...
@@ -150,11 +162,16 @@ try {
 			query.cookies[parts[0].trim()] = (parts[1] || '').trim();
 		});
 	
+		// receiveRequest trigger
 		var errors = new Array();	
 		for (var i in mods) {
 			var cont = mods[i].receiveRequest(request, u, query);
 			if (cont !== true) {
-				errors.push(cont);
+				response.writeHead(cont.httpcode, {});
+				var errorBody = "";
+				if ('e' + cont.httpcode in _errorDocs)
+					errorBody = sys.fs.readFileSync(_documentRoot + "/" + _errorDocs["e" + cont.httpcode]);
+				response.end(errorBody);
 			}
 		}
 
@@ -201,6 +218,11 @@ try {
 					sys.logger.stderr(e);
 					sys.logger.stderr("[ERR] Error serving request for " + filename);
 					response.writeHead(404, {});
+					if ("e404" in _errorDocs) {
+						response.end(sys.fs.readFileSync(_documentRoot + "/" + _errorDocs["e404"]));
+					} else {
+						response.end("");
+					}
 				}
 			}
 		} else {
