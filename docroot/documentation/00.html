@@ -9,7 +9,7 @@
 	<body><div class="marginalized">
 		<h1>Argent Documentation</h1>
 		<h2>Introduction</h2>
-		<p>Argent is a web application server build on Node.js. It is modular and designed with extensibility in mind.</p>
+		<p>Argent is a web application server built on Node.js. It is modular and designed with extensibility in mind.</p>
 		<p>There are three primary components to an Argent instance:</p>
 		<p>
 			<ul>
@@ -18,8 +18,8 @@
 				<li>Handlers</li>
 			</ul>
 		</p>
-		<p>The core HTTP server serves files by default. The functionality of Argent as a web server can be configured in httpd.conf. For more information on configuring the server, read the page on httpd.conf.</p>
-		<p>Modules add functionality to server-side operations by creating namespaces within the global mods variable. The functions in these namespaces will be accessible to other modules. All of the node.js framework is available to modules, and Argent provides some additional libraries for things like logging.</p>
+		<p>The core HTTP server serves files by default. The functionality of Argent as a web server can be configured in httpd.conf. For more information on configuring the server, <a href="04.html">read the page on httpd.conf</a>.</p>
+		<p>Modules add functionality to server-side operations by creating namespaces within the global mods variable. The functions in these namespaces will be accessible to other modules. All of the node.js framework is available to modules, and Argent provides some additional libraries for logging and working with HTTP requests and stuff.</p>
 		<p>Handlers are special, optional parts of modules which expose some of the module functions to the network. Writing a handler is the way to create custom APIs with Argent.</p>
 	</div></body>
 </html>

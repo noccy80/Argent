@@ -9,18 +9,18 @@
 	<body><div class="marginalized">
 		<h1>Argent Documentation</h1>
 		<h2>Global Variables</h2>
-		<p>The core Argent server exposes a few global variables to make programming modules easier. In no particular order, here they are:</p>
+		<p>The core Argent server exposes a few global variables to make programming modules easier. In no particular order, here they are, each indentation representing parenthood of the less indented item:</p>
 		<p><ul>
 			<li>sys</li>
-			<li><ul>
+			<li class="nobullet"><ul>
 				<li>logger</li>
-				<li><ul>
+				<li class="nobullet"><ul>
 					<li>stdout(message) - Writes `message` to standard output preceded by a timestamp.</li>
 					<li>stderr(message) - Writes `message` to standard error preceded by a timestamp.</li>
 					<li>now() - Returns the current date and time in string format.</li>
 				</ul></li>
 				<li>http</li>
-				<li><ul>
+				<li class="nobullet"><ul>
 					<li>http - The node.js http library.</li>
 					<li>url - The node.js url library.</li>
 				</ul></li>
@@ -30,5 +30,6 @@
 			</ul></li>
 			<li>mods - An object containing all modules loaded into Argent. For example, mods.session is the session module.</li>
 		</ul></p>
+		<p>In other words, if you want to log to stderr, you'd run <span class="preform">sys.logger.stderr("Error");</span></p>
 	</div></body>
 </html>

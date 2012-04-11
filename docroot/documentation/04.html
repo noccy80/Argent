@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Argent Documentation</title>
+		<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+		<link rel="stylesheet" type="text/css" href="../style/style.css" />
+		<style></style>
+	</head>
+	<body><div class="marginalized">
+		<h1>Argent Documentation</h1>
+		<h2>httpd.conf</h2>
+		<p>This page concerns the primary Argent configuration file, which is fairly well commented itself, at least in its default form. This file is <span class="preform">httpd.conf</span>, and it can be found in the <span class="preform">conf</span> directory of your Argent instance.</p>
+		<p>Argent reads this file line by line and executing each directive in sequence. If there are conflicts between two lines, the one that appears later will always take precedence, and this can be an important distinction to make sometimes.</p>
+		<p>Aside from comments, the following directives are understood right now:</p>
+		<p><ul>
+			<li><span class="preform">default_file=path/to/file.ext</span> - If Argent receives a request to serve a directory, it will look for this file in that directory to server. A good default here is <span class="preform">index.html</span></li>
+			<li><span class="preform">default_mime_type=mime/type</span> - If Argent cannot determine the mime type of a file, tell the client that it's this one. Good defaults here might be <span class="preform">text/html</span> or <span class="preform">text/plain</span></li>
+			<li><span class="preform">document_root=/path/to/doc/root</span> - Argent will only serve files from this directory and its subdirectories.</li>
+			<li><span class="preform">listen_port=number</span> - Argent will listen on this port for incoming HTTP connections. If you want to run Argent on port 80 or 443 (or any port lower than 1024), any reasonable operating system will require you to have some kind of root or otherwise elevated access. By default, Argent listens on port 12321.</li>
+			<li><span class="preform">module_dir=/path/to/mod/dir</span> - All modules and handlers can be found in this directory.</li>
+			<li><span class="preform">mod=module_name</span> - Load the module found in the file <span class="preform">module_name.js</span> in the <span class="preform">module_dir</span> directory.</li>
+			<li><span class="preform">handler=handler_file,module_it_handles</span> - Loads the handler found in <span class="preform">handler_file.js</span> in the <span class="preform">module_dir</span> directory, and uses it to handle the already-loaded module called <span class="preform">module_it_handles</span>.</li>
+			<li><span class="preform">var=variable.to.set=value</span> - Manually sets the variable <span class="preform">variable.to.set</span> to <span class="preform">value</span>.</li>
+			<li><span class="preform">ext=list,of,file,extensions,mime/type</span> - Associates the listed file extensions to the given mime type. All files with those extensions that Argents serves will be accompanied by the given mime type.</li>
+			<li><span class="preform">binary=li/st,o/f,mime/types</span> - Tells Argent to serve all of the listed mime types as binary data instead of text data. Mime types that you should list here include all image formats and fonts if you serve those, as well as any binary files, compressed files, etc. that your Argent server serves.</li>
+		</ul></p>
+		<p>Other modules may use their own config files, but you will have to read their documentation for that information.</p>
+		<p>Additionally, comments should be on their own lines (no tacking them on to the end of directives) and should begin with a hash (<span class="preform">#</span>) or a semicolon (<span class="preform">;</span>). Hashes traditionally imply commentary while semicolons traditionally imply default values for optional directives.</p>
+	</body>
+</html>

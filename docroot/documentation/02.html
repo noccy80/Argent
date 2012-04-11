@@ -9,29 +9,24 @@
 	<body><div class="marginalized">
 		<h1>Argent Documentation</h1>
 		<h2>Modules</h2>
-		<p>The core Argent server exposes a few global variables to make programming modules easier. In no particular order, here they are:</p>
+		<p>Modules add functionality to the Argent server. If you can program it in JavaScript, you can make it an Argent module. A simple example is the <span class="preform">blacklist</span> module, which allows or denies requests for pages and API calls based on the IP address of the client and the module's configuration.</p>
+		<p>All modules must have three specific functions defined, even if they're empty. They are:</p>
 		<p><ul>
-			<li>sys</li>
-			<li><ul>
-				<li>logger</li>
-				<li><ul>
-					<li>stdout(message) - Writes `message` to standard output preceded by a timestamp.</li>
-					<li>stderr(message) - Writes `message` to standard error preceded by a timestamp.</li>
-					<li>now() - Returns the current date and time in string format.</li>
-				</ul></li>
-				<li>http</li>
-				<li><ul>
-					<li>http - The node.js http library.</li>
-					<li>url - The node.js url library.</li>
-				</ul></li>
-				<li>fs - The node.js fs library.</li>
-				<li>path - The node.js path library.</li>
-				<li>handlers - An array of all handlers loaded into Argent.</li>
-			</ul></li>
-			<li>mods - An object containing all modules loaded into Argent. For example, mods.session is the session module.</li>
+			<li><span class="preform">init()</span></li>
+			<li><span class="preform">receiveRequest(r, u, q)</span></li>
+			<li><span class="preform">shutdown()</span></li>
 		</ul></p>
-		<p>Modules must have three specific functions defined, even if they're empty. They are:</p>
-		<p><ul>
-			<li>init()</li>
-			<li>request
-		</ul></p>
+		<p><span class="preform">init()</span> gets run once for each module after Argent has read its main config but before the socket is opened to receive connections. You can use this like a sort of constructor. If there are variables set in <a href="04.html">httpd.conf</a>, they will have been assigned by now. The <span class="preform">blacklist</span> module uses this function to read in its blacklist from a separate file, for example.</p>
+		<p><span class="preform">receiveRequest(r, u, q)</span> - This gets called in each module after an HTTP request has been received by Argent, but before any major processing has been done with that data. <span class="preform"></span> is a node.js Request object. <span class="preform">u</span> is the URL in the request. <span class="preform">q</span> is the parsed query attached to the URL. This function must return a binary <span class="preform">true</span> value or a string (I know that's weird). <span class="preform">true</span> means that the module has finished any work it needed to do with this data. A string value will result in the server rejecting the request, responding with a 500 internal server error, and printing the string to the Argent error log. Use this if you need to interrupt the request for any reason. The blacklist module uses this to get the IP addresses on incoming requests and either allowing them (returns true) or rejecting them (returns a string explaining why, which is usually that your IP is in the blacklist).</p>
+		<p><span class="preform">shutdown()</span> - This currently doesn't ever get called, but in the future, all modules will have their shutdown functions called when I work out a good way to have Argent do a clean shutdown. This will allow you to write any pending data to disk, etc. before the node process ends.</p>
+		<p>There are two additional rules to obey here. First, the filename of the module must be <span class="preform">moduleName.js</span>, and the module's object name must be <span class="preform">moduleName</span>. In other words, the filename and the object name in code must be identical - except for the addition of the file extension on the filename - and case matters. Second, you must store your object in the global <span class="preform">mods</span> namespace.</p>
+		<p>For example, the following is a good template for starting a module:</p>
+<pre>
+mods.moduleName = {
+    init:function(){},
+    receiveRequest(r, u, q){},
+    shutdown(){}
+};
+</pre>
+	</body>
+</html>
