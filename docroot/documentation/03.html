@@ -10,7 +10,7 @@
 		<h1>Argent Documentation</h1>
 		<h2>Handlers</h2>
 		<p>Handlers are special, optional parts of modules which expose some of the module functions to the network. If you haven't read the <a href="02.html">Modules page</a> in full, please do so before reading this page.</p>
-		<p>If your module is called myModule and is stored within the <span class="preform">mods</span> global variable like it's supposed to be, then your module's handler should be stored at <span class="preform">mods.myModule.handler</span> and in a special global variable called <span class="preform">sys.handlers["myModule"]</span></p>
+		<p>If your module is called myModule and is stored within the <span class="preform">mods</span> global variable like it's supposed to be, then your module's handler should be stored at <span class="preform">mods.myModule.handler</span> and in a special global variable called <span class="preform">sys.handlers.myModule</span></p>
 		<p>But you should never have to assign those yourself. If you have configured Argent properly, these assignments will be made for you and will be available at all times that your module is capable of executing, so effectively always.</p>
 		<p>Handlers need to contain two specific functions to operate. They are:</p>
 		<p><ul>
