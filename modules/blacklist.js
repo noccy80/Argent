@@ -13,7 +13,7 @@ var blacklist = {
 	init:function(){
 		this.reload();
 		sys.logger.stdout("Blacklist module initialized");
-		return 1;
+		return 0;
 	},
 
 	receiveRequest:function(r, u, q){

@@ -21,7 +21,7 @@ var session = {
 
 	/* GLOBAL FUNCTIONS */
 	
-	init:function(){return 1;},
+	init:function(){return 0;},
 	
 	receiveRequest:function(r, u, q){return true;},
 	

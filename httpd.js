@@ -62,6 +62,14 @@ sys.isBinaryType = function(mimetype, table) {
 	return false;
 };
 
+// Exit sequence
+process.on("SIGINT", function() {
+	sys.logger.stdout("Shutting down...");
+	for (var i in mods)
+		mods[i].shutdown();
+	process.exit(0);
+});
+
 
 
 // Run the server itself
@@ -144,7 +152,8 @@ try {
 	// Initialize all modules
 	for (var i in mods) {
 		var initCode = mods[i].init();
-		if (initCode != 1) {
+		if (initCode != 0) {
+			sys.logger.stderr(initCode);
 			exit(initCode);
 		}
 	}

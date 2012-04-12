@@ -9,7 +9,7 @@
 body, html	{ background-color:#fff; color:#000; font-family:"Droid Serif", "Times New Roman", serif;
 			  font-size:16pt; }
 h1, h2		{ text-align:center; }
-p 			{ color:black; }
+p 			{ color:black; line-height:1.25em; }
 input		{ border:2px solid #ccc; padding:6px; font-family:"Droid Serif"; font-size:14pt;
 			  border-radius:6px; text-align:center; }
 input:hover	{ border-color:#999; }
@@ -19,6 +19,7 @@ table		{ float:none; margin:auto; }
 td			{ text-align:center; padding:10px; }
 hr			{ height:2px; width:25%; color:#444; background-color:#444; border:none; }
 li			{ margin-bottom:1em; }
+pre			{ font-size:14pt; }
 
 /* ELEMENT CLASSES */
 .centered	{ text-align:center; }
@@ -27,4 +28,4 @@ a.button	{ text-decoration:none; padding:6px; border-radius:6px; border:2px soli
 a.button:hover	{ color:#000; background-color:#bbb; }
 div.marginalized { width:800px; float:none; margin:0 auto; }
 li.nobullet { list-style-type:none; }
-span.preform { font-family:"Droid Sans Mono"; }
+span.preform { font-family:"Droid Sans Mono"; font-size:14pt; }
