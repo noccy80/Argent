@@ -1,13 +1,6 @@
-/* CUSTOM LOADED FONTS */
-@font-face { font-family:"Droid Serif"; src:url("fonts/DroidSerif-Regular.ttf"); }
-@font-face { font-family:"Droid Serif"; font-weight:bold; src:url("fonts/DroidSerif-Bold.ttf"); }
-@font-face { font-family:"Droid Serif"; font-style:italic; src:url("fonts/DroidSerif-Italic.ttf"); }
-@font-face { font-family:"Droid Serif"; font-style:italic; font-weight:bold; src:url("fonts/DroidSerif-BoldItalic.ttf"); }
-@font-face { font-family:"Droid Sans Mono"; src:url("fonts/DroidSansMono.ttf"); }
-
 /* HTML TAGS */
 body, html	{ background-color:#fff; color:#000; font-family:"Droid Serif", "Times New Roman", serif;
-			  font-size:16pt; }
+			  font-size:11pt; }
 h1, h2		{ text-align:center; }
 p 			{ color:black; line-height:1.25em; }
 input		{ border:2px solid #ccc; padding:6px; font-family:"Droid Serif"; font-size:14pt;
@@ -19,7 +12,7 @@ table		{ float:none; margin:auto; }
 td			{ text-align:center; padding:10px; }
 hr			{ height:2px; width:25%; color:#444; background-color:#444; border:none; }
 li			{ margin-bottom:1em; }
-pre			{ font-size:14pt; }
+pre			{ font-size:11pt; }
 
 /* ELEMENT CLASSES */
 .centered	{ text-align:center; }
@@ -28,4 +21,4 @@ a.button	{ text-decoration:none; padding:6px; border-radius:6px; border:2px soli
 a.button:hover	{ color:#000; background-color:#bbb; }
 div.marginalized { width:800px; float:none; margin:0 auto; }
 li.nobullet { list-style-type:none; }
-span.preform { font-family:"Droid Sans Mono"; font-size:14pt; }
+span.preform { font-family:"Droid Sans Mono"; font-size:11pt; }

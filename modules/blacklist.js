@@ -3,10 +3,10 @@
  * from IP addresses listed in blacklist.conf
  */
 
-var blacklist = {
+mods.blacklist = {
 	config:{
 		whitelist_behavior:false,
-		list_file:"./conf/blacklist.conf",
+		list_file:"./conf/blacklist.list",
 		list:{}
 	},
 
@@ -39,5 +39,3 @@ var blacklist = {
 		this.config.list = sys.fs.readFileSync(this.config.list_file, "UTF-8").split('\n');
 	}
 };
-
-mods.blacklist = blacklist;

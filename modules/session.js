@@ -6,7 +6,7 @@
  */
 
 // The main session data object
-var session = {
+mods.session = {
 	config:{
 		disable_get:false,
 		disable_set:false,
@@ -128,5 +128,3 @@ var session = {
 		return this;
 	}
 };
-
-mods.session = session;

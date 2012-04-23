@@ -1,4 +1,7 @@
-Update comments in default httpd.conf
-Check documentation for accuracy
-Work on database plugins
-Delete admin pack stuff
+ * Update comments in default httpd.conf
+ * Add include directive so you can chain-link files
+ * Add server_root and server_url directives for server config
+ * Check documentation for accuracy
+   Work on database plugins
+ * Optimize default website so as to improve performance
+   * Remove fonts folder

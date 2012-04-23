@@ -10,6 +10,12 @@ sys.http.http = require('http');
 sys.http.url = require('url');
 sys.fs = require('fs');
 sys.path = require('path');
+sys.config = {
+	"server_url":"",
+	"server_root":"/var/argent/",
+	"default_conf_file":"conf/httpd.conf"
+};
+
 
 // Set up basic module framework
 GLOBAL.mods = {};
@@ -62,30 +68,11 @@ sys.isBinaryType = function(mimetype, table) {
 	return false;
 };
 
-// Exit sequence
-process.on("SIGINT", function() {
-	sys.logger.stdout("Shutting down...");
-	for (var i in mods)
-		mods[i].shutdown();
-	process.exit(0);
-});
-
-
-
-// Run the server itself
-try {
-
+function parseConfigFile(file) {
+	sys.logger.stdout("Config file: " + file);
 	// Read the conf file and initialize the expected variables
-	var _confContent = sys.fs.readFileSync("./conf/httpd.conf", "UTF-8").split('\n');
-	var _defaultFile = "";
-	var _defaultMimeType = "";
-	var _documentRoot = "";
-	var _listenPort = 0;
-	var _moduleDir = "";
-	var _exts = new Array();
-	var _bins = new Array();
-	var _errorDocs = {};
-
+	var _confContent = sys.fs.readFileSync(file, "UTF-8").split('\n');
+	
 	// Look at each line of the conf file
 	for (var i = 0; i < _confContent.length; ++i) {
 		var pair = _confContent[i].split('=');
@@ -142,8 +129,51 @@ try {
 				eval("_errorDocs.e" + edocparts[0] + " = \"" + edocparts[1] + "\";");
 				sys.logger.stdout("Setting error document for error " + edocparts[0] + " to " + edocparts[1]);
 			}
+			
+			// Include another config file
+			if (pair[0] == "include") {
+				if (pair[1].charAt(0) == "/") {
+					parseConfigFile(pair[1]);
+				} else {
+					parseConfigFile(sys.config.server_root + pair[1]);
+				}
+			}
+			
+			// Set server root
+			if (pair[0] == "server_root")
+				sys.config.server_root = pair[1];
+			
+			// Set server URL
+			if (pair[0] == "server_url")
+				sys.config.server_url = pair[1];
 		}
 	}
+}
+
+// Exit sequence
+process.on("SIGINT", function() {
+	sys.logger.stdout("Shutting down...");
+	for (var i in mods)
+		mods[i].shutdown();
+	process.exit(0);
+});
+
+
+
+// Run the server itself
+try {
+
+	var _defaultFile = "";
+	var _defaultMimeType = "";
+	var _documentRoot = "";
+	var _listenPort = 0;
+	var _moduleDir = "";
+	var _exts = new Array();
+	var _bins = new Array();
+	var _errorDocs = {};
+
+	// Parse all config files
+	parseConfigFile("./conf/httpd.conf");
 	
 	// Remove potential postslash from the docroot
 	if (_documentRoot.substring(_documentRoot.length - 2) == "/")
