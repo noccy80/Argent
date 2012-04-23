@@ -1,1 +1,4 @@
-Admin module with graceful shutdown procedure. Update 02.html.
+Update comments in default httpd.conf
+Check documentation for accuracy
+Work on database plugins
+Delete admin pack stuff
