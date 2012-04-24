@@ -12,7 +12,7 @@ table		{ float:none; margin:auto; }
 td			{ text-align:center; padding:10px; }
 hr			{ height:2px; width:25%; color:#444; background-color:#444; border:none; }
 li			{ margin-bottom:1em; }
-pre			{ font-size:11pt; }
+pre			{ font-family:"Droid Sans Mono"; font-size:11pt; }
 
 /* ELEMENT CLASSES */
 .centered	{ text-align:center; }

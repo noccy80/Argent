@@ -16,7 +16,6 @@ sys.config = {
 	"default_conf_file":"conf/httpd.conf"
 };
 
-
 // Set up basic module framework
 GLOBAL.mods = {};
 
@@ -157,8 +156,6 @@ process.on("SIGINT", function() {
 		mods[i].shutdown();
 	process.exit(0);
 });
-
-
 
 // Run the server itself
 try {
