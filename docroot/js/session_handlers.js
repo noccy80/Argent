@@ -95,4 +95,4 @@ function btnSnapshot_click() {
 	});
 }
 
-var ajaxUrl = "http://gradysghost.doesntexist.com:12321";
+var ajaxUrl = "http://localhost:12321";
