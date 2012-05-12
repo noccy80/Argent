@@ -13,7 +13,7 @@ mods.session.handler = {
 		return false;
 	},
 
-	handle:function(a, r, q) {
+	handle:function(a, r, q, res) {
 		switch(a) {
 			case "start":
 				sys.logger.stdout(JSON.stringify(this));

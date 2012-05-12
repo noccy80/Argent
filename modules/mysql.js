@@ -14,37 +14,23 @@ mods.mysql = {
 	libs:{},
 	
 	config:{
-		connect_on_init:true,
 		defaults:{
 			host:"localhost",
 			port:3306,
 			user:"root",
 			password:null,
 			database:null
-		},
-		queries:{}
+		}
 	},
-	
-	client:null,
 	
     init:function(){
 		this.libs.mysql = require('mysql');
-		if (this.config.connect_on_init)
-			this.client = this.libs.mysql.createClient(this.config.defaults);
 		return 0;
-	},
-	
-	addConnection:function(name, config){
-		this.config[name] = config;
-	},
-	
-	addQuery:function(name, query){
-		this.config.queries[name] = query;
 	},
 	
 	connect:function(config){
 		config = typeof config !== 'undefined' ? config : this.config.defaults;
-		this.client = this.libs.mysql.createClient(config);
+		return this.libs.mysql.createClient(config);
 	},
 	
 	disconnect:function(){
@@ -53,22 +39,34 @@ mods.mysql = {
 		});
 	},
 	
-	query:function(name, params, disconnect, config){
-		if (disconnect !== true) disconnect = false;
-		if (this.client == null) this.client.connect(config);
-		var query = this.config.queries[name];
-		
-		this.client.query(quer
-		if (disconnect) this.disconnect();
+	query:function(query, params, config, response){
+		var client = this.connect(config);
+		client.query(query, params,
+			function(err, results, fields) {
+				sys.logger.stderr("QUERY ERROR: " + err);
+				sys.logger.stdout("QUERY RESULTS: " + JSON.stringify(results));
+				sys.logger.stdout("FIELDS: " + JSON.stringify(fields));
+				if (err == null) {
+					sys.respond(response, 200, "application/json", JSON.stringify({
+						"query":query,
+						"results":JSON.stringify(results),
+						"fields":JSON.stringify(fields)
+					}), {});
+				} else {
+					sys.respond(response, 200, "application/json", JSON.stringify({
+						"query":query,
+						"results":null,
+						"error":err
+					}), {});
+				}
+			}
+		);
 	},
 	
-	query:function(query, params, disconnect, config){
-		if (disconnect !== true) disconnect = false;
-		if (this.client == null) this.client.connect(config);
-		
-	},
-	
-    receiveRequest(r, u, q){return true;},
+    receiveRequest:function(r, u, q){return true;},
     
     shutdown:function(){}
+    
 };
+
+// SELECT * FROM `contact`;

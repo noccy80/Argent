@@ -2,6 +2,8 @@
  * btnStart_click()
  * btnSet_click()
  * btnGet_click()
+ * btnSave_click()
+ * btnSnapshot_click()
  */
 
 function btnStart_click() {
@@ -93,20 +95,4 @@ function btnSnapshot_click() {
 	});
 }
 
-function btnClearCache_click() {
-
-}
-
-function btnClearSnapshot_click() {
-
-}
-
-function btnLoad_click() {
-
-}
-
-function btnRestore_click() {
-
-}
-
-var ajaxUrl = "http://gradysghost.doesntexist.com:12321";
+var ajaxUrl = "http://localhost:12321";

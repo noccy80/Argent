@@ -22,7 +22,8 @@ GLOBAL.mods = {};
 // r = The HTTP request
 // u = The parsed URL object
 // q = The query part of the URL, parsed
-sys.handleAction = function(r, u, q) {
+// response = The response object
+sys.handleAction = function(r, u, q, response) {
 	var a = q.action.toLowerCase();
 	var moduleName = a.split('@')[0];
 	var action = a.split('@')[1];
@@ -33,10 +34,12 @@ sys.handleAction = function(r, u, q) {
 		eval("var handler = sys.handlers['" + moduleName + "']");
 		
 		if (handler.handlesAction(action)) {
-			ret = handler.handle(action, r, q);
-			sys.logger.stdout(JSON.stringify(ret));
-			ret.headers['content-length'] = JSON.stringify(ret.response).length;
-			sys.logger.stdout("Response: " + JSON.stringify(ret.response));
+			ret = handler.handle(action, r, q, response);
+			if (ret != null) {
+				sys.logger.stdout(JSON.stringify(ret));
+				ret.headers['content-length'] = JSON.stringify(ret.response).length;
+				sys.logger.stdout("Response: " + JSON.stringify(ret.response));
+			}
 		} else {	// Module can't handle the action, much like your mom
 			sys.logger.stderr("[ERR] The `" + moduleName + "` module cannot handle action `" + action + "`.");
 			ret.headers = {"content-type":"application/json"};
@@ -49,6 +52,17 @@ sys.handleAction = function(r, u, q) {
 	}
 	return ret;
 };
+
+sys.respond = function(response, httpcode, mimetype, body, headers) {
+	headers["Content-Type"] = mimetype;
+	headers["Content-Length"] = body.length;
+	response.writeHead(httpcode, headers);
+	if (sys.isBinaryType(mimetype, _bins)) {
+		response.end(body, 'binary');
+	} else {
+		response.end(body);
+	}
+}
 
 sys.getMimeType = function(filename, table) {
 	var parts = filename.split('.');
@@ -78,7 +92,8 @@ function parseConfigFile(file) {
 		if (pair[0].charAt(0) != '#' && pair[0].charAt(0) != ';') {
 			// Check for expected values and react to them
 			if (pair[0] == "default_file") _defaultFile = pair[1];
-			if (pair[0] == "default_mime_type") _defaultMimeType = pair[1];
+			if (pair[0] == "default_file_mime_type") _defaultFileMimeType = pair[1];
+			if (pair[0] == "default_action_mime_type") _defaultActionMimeType = pair[1];
 			if (pair[0] == "document_root") _documentRoot = pair[1];
 			if (pair[0] == "listen_port") _listenPort = parseInt(pair[1]);
 			
@@ -161,7 +176,8 @@ process.on("SIGINT", function() {
 try {
 
 	var _defaultFile = "";
-	var _defaultMimeType = "";
+	var _defaultFileMimeType = "";
+	var _defaultActionMimeType = "";
 	var _documentRoot = "";
 	var _listenPort = 0;
 	var _moduleDir = "";
@@ -203,61 +219,57 @@ try {
 		for (var i in mods) {
 			var cont = mods[i].receiveRequest(request, u, query);
 			if (cont !== true) {
-				response.writeHead(cont.httpcode, {});
-				var errorBody = "";
-				if ('e' + cont.httpcode in _errorDocs)
-					errorBody = sys.fs.readFileSync(_documentRoot + "/" + _errorDocs["e" + cont.httpcode]);
-				response.end(errorBody);
+				if ('e' + cont.httpcode in _errorDocs) {
+					sys.respond(response,
+						cont.httpcode,
+						_defaultFileMimeType,
+						sys.fs.readFileSync(_documentRoot + "/" + _errorDocs["e" + cont.httpcode]),
+						{}
+					);
+				} else {
+					sys.respond(response, cont.httpcode, _defaultFileMimeType, "", {});
+				}
 			}
 		}
 
 		if (errors.length == 0) {
 			// Actions always override file requests
 			if (query.action) {
-				var ret = sys.handleAction(request, u, query);
-				response.writeHead(200, ret.headers);
-				response.end(JSON.stringify(ret.response));
-			} else {	// We got no action
+				var ret = sys.handleAction(request, u, query, response);
+				if (ret != null)
+					sys.respond(response, 200, _defaultActionMimeType, JSON.stringify(ret.response), ret.headers);			} else {	// We got no action
 				// Work over the filename to retrieve
 				fnameParts = filename.split('/');
 				if (fnameParts[fnameParts.length - 1].indexOf('.') == -1) { // There is no . in the filename part of the path
 					// Append a trailing slash if it's not there
 					if (filename.charAt(filename.length - 1) != '/') {
 						filename += '/';
-						response.writeHead(302, {"Location":filename});
-						response.end("");
+						sys.respond(response, 302, "", "", {"Location":filename});
 					}
 					// If there's still no filename, add the default
 					if (filename.charAt(filename.length - 1) == '/') filename += _defaultFile;
 				}
 				filename = _documentRoot + "/" + filename;
 				mimetype = sys.getMimeType(filename, _exts);
-				if (mimetype == null) mimetype = _defaultMimeType;
+				if (mimetype == null) mimetype = _defaultFileMimeType;
 				sys.logger.stdout("Request from " + request.connection.remoteAddress + ": " + request.url + " -> " + filename + " (" + mimetype + ")");
 			
 				try {
 					var body = sys.fs.readFileSync(filename);
-				
-					// Write out document
-					response.writeHead(200,
-						{
-							'Content-Type': mimetype,
-							'Content-Length': body.length
-						}
-					);
-					if (sys.isBinaryType(mimetype, _bins)) {
-						response.end(body, 'binary');
-					} else {
-						response.end(body);
-					}
+					sys.respond(response, 200, mimetype, body, {'Content-Type': mimetype, 'Content-Length': body.length});
 				} catch (e) {	// Bad file?
 					sys.logger.stderr(e);
 					sys.logger.stderr("[ERR] Error serving request for " + filename);
-					response.writeHead(404, {});
 					if ("e404" in _errorDocs) {
-						response.end(sys.fs.readFileSync(_documentRoot + "/" + _errorDocs["e404"]));
+						var errorFileName = _documentRoot + "/" + _errorDocs["e404"];
+						sys.respond(response,
+							404,
+							sys.getMimeType(errorFileName, _exts),
+							sys.fs.readFileSync(errorFileName),
+							{}
+						);
 					} else {
-						response.end("");
+						sys.respond(response, 404, _defaultFileMimeType, "", {});
 					}
 				}
 			}
