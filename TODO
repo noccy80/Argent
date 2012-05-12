@@ -13,22 +13,6 @@ to be auto-parsed or anything.
 
 * * */
 
-GradysGhost - 12 May, 2012
-
-    Look at all "eval" statements in the code and determine if they're
-    necessary. These slow things down, are bad JavaScript practice, and
-    are often avoidable.
-    
-    Looks like (aside from JQuery) we only have one affected file. Here
-    is some grep output:
-    
-    ./httpd.js:	if (eval("sys.handlers['" + moduleName + "']")) {
-    ./httpd.js:		eval("var handler = sys.handlers['" + moduleName + "']");
-    ./httpd.js:					eval("_exts['" + parts[j] + "'] = '" + parts[parts.length - 1] + "';");
-    ./httpd.js:					eval("sys.handlers['" + details[1] + "'] = mods." + details[1] + ".handler;");
-    ./httpd.js:				eval(varparts[0] + " = " + varparts[1] + ";");
-    ./httpd.js:				eval("_errorDocs.e" + edocparts[0] + " = \"" + edocparts[1] + "\";");
-
 GradysGhost - 12 May 2012
 
     Review documentation and update all of it.
