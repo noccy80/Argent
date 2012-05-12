@@ -101,7 +101,7 @@ function parseConfigFile(file) {
 			if (pair[0] == "ext") {
 				var parts = pair[1].split(',');
 				for (var j = 0; j < parts.length - 1; ++j)
-					eval("_exts['" + parts[j] + "'] = '" + parts[parts.length - 1] + "';");
+					_exts[parts[j]] = parts[parts.length - 1];
 			}
 
 			// Load binary table
