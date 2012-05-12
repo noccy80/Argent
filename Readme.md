@@ -17,4 +17,10 @@ Documentation is provided internally as HTML files. See /your/argent/root/docroo
 
 ## Notes
 
-I try not to push anything to this master branch if the software isn't running, but I'm not making any guarantees. As mentioned above, this software is presented as-is. It's open source so you can fix anything you find broken and hopefully tell me about it so I can work it into the main branch. My email address is listed here. This isn't the most organized programming team in the history of programming teams, but hopefully I can be somewhat available.
+We try not to push anything to this master branch if the software isn't running, but I'm not making any guarantees. As mentioned above, this software is presented as-is. It's open source so you can fix anything you find broken and hopefully tell me about it so I can work it into the main branch. My email address is listed here. This isn't the most organized programming team in the history of programming teams, but hopefully I can be somewhat available.
+
+## A note to contributors
+
+This applies to you if you have rights to push to this repo.
+
+If you are going to do some work, be sure to keep it in your own branch and merge upstream to master when it's running. Please don't merge to master if your copy of the repo doesn't run. Also, please put your name or handle in the names of your branches. This allows us to look at each others' code and execute/debug it without losing our own code. It also can be used to let us know what you're doing with the code. A branch called 'gradysghost-mod-logging' would indicate that I (GradysGhost) am working on a logging module. One of these days when I get bugtracking organized, 'gradysghost-1234' might indicate that I'm working on bug 1234.
