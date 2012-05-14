@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Argent is a web application server built on Node.js. It is modular and designed with extensibility in mind. This software is made available as-is in the hopes that it will be useful to you, but comes with no warranty whatsoever. It is released under the GNU Public Licence, version 3. See Licence.txt for all the legal mumbo-jumbo.
+Argent is a web application server built on Node.js. It is modular and designed with extensibility in mind. This software is made available as-is in the hopes that it will be useful to you, but comes with no warranty whatsoever. It is released under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html).
 
 ## Authors
 
@@ -13,14 +13,14 @@ If you decide to use Argent for a project, we'd love to know. Send us an email t
 
 ## Documentation
 
-Documentation is provided internally as HTML files. See /your/argent/root/docroot/documentation/ for the files or browse to http://yourargentserver.com:12321/documentation/ when you have the default distribution of Argent running.
+Documentation can be found in our wiki at https://github.com/GradysGhost/Argent/wiki/Home
 
 ## Notes
 
-We try not to push anything to this master branch if the software isn't running, but I'm not making any guarantees. As mentioned above, this software is presented as-is. It's open source so you can fix anything you find broken and hopefully tell me about it so I can work it into the main branch. My email address is listed here. This isn't the most organized programming team in the history of programming teams, but hopefully I can be somewhat available.
+We developers try not to push anything to the master branch if the code doesn't run, but I'm not making any guarantees. As mentioned above, this software is presented as-is. It's open source so you can fix anything you find broken and hopefully tell us about it so we can work it into the main branch. Official contact information is listed on this github site. This isn't the most organized programming team in the history of programming teams, but hopefully we can be somewhat available.
 
 ## A note to contributors
 
-This applies to you if you have rights to push to this repo.
+This applies to you if you have rights to push to this repository.
 
-If you are going to do some work, be sure to keep it in your own branch and merge upstream to master when it's running. Please don't merge to master if your copy of the repo doesn't run. Also, please put your name or handle in the names of your branches. This allows us to look at each others' code and execute/debug it without losing our own code. It also can be used to let us know what you're doing with the code. A branch called 'gradysghost-mod-logging' would indicate that I (GradysGhost) am working on a logging module. One of these days when I get bugtracking organized, 'gradysghost-1234' might indicate that I'm working on bug 1234.
+If you are going to do some work, be sure to keep it in your own branch and merge upstream to master when it's running and functional. Please don't merge to master if your copy of the repo doesn't run. Also, please put your name or handle in the names of your branches. This allows us to look at each others' code and execute/debug it without losing our own code. It also can be used to let us know what you're doing with the code. A branch called `gradysghost-mod-logging` would indicate that I (GradysGhost) am working on a logging module. If you are checking the code out to work an issue (all issues should be logged on Github, by the way), put the issue number in the branch name.
