@@ -31,6 +31,7 @@
 					<li>server_root - The directory where the server's executables can be found</li>
 					<li>server_url - The preferred URL for use with this Argent server</li>
 				</ul></li>
+				<li>respond(response, httpcode, mimetype, body, headers) - Sends a response to the client connection to whom 'response' refers to. The response uses the code in 'httpcode' (like 200 for success, or 404 for not found), and sends the 'body' as a file of type 'mimetype'. The HTTP headers will be set to the contents of the 'headers' object.</li>
 			</ul></li>
 			<li>mods - An object containing all modules loaded into Argent. For example, mods.session is the session module.</li>
 		</ul></p>

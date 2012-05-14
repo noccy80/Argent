@@ -30,8 +30,8 @@
 		<p>For example, the following is a good template for starting a module:</p>
 <pre>
 mods.moduleName = {
-    init:function(return 0;){},
-    receiveRequest(r, u, q){},
+    init:function(){return 0;},
+    receiveRequest(r, u, q){return true;},
     shutdown(){}
 };
 </pre>
