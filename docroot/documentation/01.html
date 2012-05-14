@@ -27,6 +27,10 @@
 				<li>fs - The node.js fs library.</li>
 				<li>path - The node.js path library.</li>
 				<li>handlers - An array of all handlers loaded into Argent.</li>
+				<li>config - An object containing server-level configuration options (no module configs should be stored here).</li><ul>
+					<li>server_root - The directory where the server's executables can be found</li>
+					<li>server_url - The preferred URL for use with this Argent server</li>
+				</ul></li>
 			</ul></li>
 			<li>mods - An object containing all modules loaded into Argent. For example, mods.session is the session module.</li>
 		</ul></p>
