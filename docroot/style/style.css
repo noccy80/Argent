@@ -2,7 +2,7 @@
 body, html	{ background-color:#fff; color:#000; font-family:"Droid Serif", "Times New Roman", serif;
 			  font-size:11pt; }
 h1, h2		{ text-align:center; }
-p 			{ color:black; line-height:1.25em; }
+p 			{ color:black; line-height:1.25em; font-size:12pt; }
 input, textarea { border:2px solid #ccc; padding:6px; font-family:"Droid Serif"; font-size:14pt;
 				  border-radius:6px; text-align:center; }
 input:hover, textarea:hover
@@ -23,7 +23,7 @@ a.button:hover	{ color:#000; background-color:#bbb; }
 div.indented{ width:100%; margin-left:50px; }
 div.marginalized { width:900px; float:none; margin:auto; }
 li.nobullet { list-style-type:none; }
-span.preform{ font-family:"Droid Sans Mono"; font-size:11pt; }
+span.preform{ font-family:"Droid Sans Mono", "Andale Mono", monospace; font-size:11pt; }
 .strong     { font-weight:bold; font-size:14pt; }
 p.warning   { padding:6px; border-radius:6px; border:2px solid #900;
 			  background-color:#fcc; }
