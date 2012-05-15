@@ -12,7 +12,16 @@ sys.fs = require('fs');
 sys.path = require('path');
 sys.config = {
 	"server_url":"",
-	"default_conf_file":"conf/httpd.conf"
+	"default_conf_file":"conf/httpd.conf",
+	"listen_port":12321,
+	"default_file":"index.html",
+	"default_file_mime_type":"text/html",
+	"default_action_mime_type":"application/json",
+	"document_root":"./docroot",
+	"module_directory":"./modules",
+	"extensions":new Array(),
+	"binaries":new Array(),
+	"error_documents":{}
 };
 
 // Set up basic module framework
@@ -56,29 +65,44 @@ sys.respond = function(response, httpcode, mimetype, body, headers) {
 	headers["Content-Type"] = mimetype;
 	headers["Content-Length"] = body.length;
 	response.writeHead(httpcode, headers);
-	if (sys.isBinaryType(mimetype, _bins)) {
+	if (sys.isBinaryType(mimetype, sys.config.binaries)) {
 		response.end(body, 'binary');
 	} else {
 		response.end(body);
 	}
 }
 
-sys.getMimeType = function(filename, table) {
+sys.getMimeType = function(filename) {
 	var parts = filename.split('.');
 	var ext = parts[parts.length - 1].toLowerCase();
-	if (table[ext]) {
-		return table[ext];
+	if (sys.config.extensions[ext]) {
+		return sys.config.extensions[ext];
 	} else {
 		return null;
 	}
 };
 
 sys.isBinaryType = function(mimetype, table) {
-	for (var i = 0; i < _bins; ++i)
-		if (_bins[i] == mimetype)
+	for (var i = 0; i < sys.config.binaries; ++i)
+		if (sys.config.binaries[i] == mimetype)
 			return true;
 	return false;
 };
+
+sys.parseFilename = function(filename) {
+	// Work over the filename to retrieve
+	var fnameParts = filename.split('/');
+	if (fnameParts[fnameParts.length - 1].indexOf('.') == -1) { // There is no . in the filename part of the path
+		// Append a trailing slash if it's not there
+		if (filename.charAt(filename.length - 1) != '/') {
+			filename += '/';
+			sys.respond(response, 302, "", "", {"Location":filename});
+		}
+		// If there's still no filename, add the default
+		if (filename.charAt(filename.length - 1) == '/') filename += sys.config.default_file;
+	}
+	return sys.config.document_root + "/" + filename;
+}
 
 function parseConfigFile(file) {
 	sys.logger.stdout("Config file: " + file);
@@ -90,37 +114,37 @@ function parseConfigFile(file) {
 		var pair = _confContent[i].split('=');
 		if (pair[0].charAt(0) != '#' && pair[0].charAt(0) != ';') {
 			// Check for expected values and react to them
-			if (pair[0] == "default_file") _defaultFile = pair[1];
-			if (pair[0] == "default_file_mime_type") _defaultFileMimeType = pair[1];
-			if (pair[0] == "default_action_mime_type") _defaultActionMimeType = pair[1];
-			if (pair[0] == "document_root") _documentRoot = pair[1];
-			if (pair[0] == "listen_port") _listenPort = parseInt(pair[1]);
+			if (pair[0] == "default_file") sys.config.default_file = pair[1];
+			if (pair[0] == "default_file_mime_type") sys.config.default_file_mime_type = pair[1];
+			if (pair[0] == "default_action_mime_type") sys.config.default_action_mime_type = pair[1];
+			if (pair[0] == "document_root") sys.config.document_root = pair[1];
+			if (pair[0] == "listen_port") sys.config.listen_port = parseInt(pair[1]);
 			
 			// Load ext/mimetype table entry
 			if (pair[0] == "ext") {
 				var parts = pair[1].split(',');
 				for (var j = 0; j < parts.length - 1; ++j)
-					_exts[parts[j]] = parts[parts.length - 1];
+					sys.config.extensions[parts[j]] = parts[parts.length - 1];
 			}
 
 			// Load binary table
 			if (pair[0] == "binary") {
 				var parts = pair[1].split(',');
 				for (var j = 0; j < parts.length; ++j)
-					_bins.push(parts[j]);
+					sys.config.binaries.push(parts[j]);
 			}
 			
 			// Set the module directory
 			if (pair[0] == "module_dir") {
-				_moduleDir = pair[1];
-				if (_moduleDir.substring(_moduleDir.length - 2) == "/")
-					_moduleDir = _moduleDir.substring(_moduleDir.length - 2);
+				sys.config.module_directory = pair[1];
+				if (sys.config.module_directory.substring(sys.config.module_directory.length - 2) == "/")
+					sys.config.module_directory = sys.config.module_directory.substring(sys.config.module_directory.length - 2);
 			}
 			
 			// Load a module/handler
 			if (pair[0] == "handler" || pair[0] == "mod") {
 				var details = pair[1].split(',');  // 0 = handler file; 1 = module it handles
-				var mod_file = _moduleDir + "/" + details[0] + ".js";
+				var mod_file = sys.config.module_directory + "/" + details[0] + ".js";
 				require(mod_file);
 				
 				if (pair[0] == "handler")
@@ -139,7 +163,7 @@ function parseConfigFile(file) {
 			// Set an error document
 			if (pair[0] == "error_document") {
 				var edocparts = pair[1].split(',');
-				eval("_errorDocs.e" + edocparts[0] + " = \"" + edocparts[1] + "\";");
+				eval("sys.config.error_documents.e" + edocparts[0] + " = \"" + edocparts[1] + "\";");
 				sys.logger.stdout("Setting error document for error " + edocparts[0] + " to " + edocparts[1]);
 			}
 			
@@ -169,23 +193,12 @@ process.on("SIGINT", function() {
 
 // Run the server itself
 try {
-
-	var _defaultFile = "";
-	var _defaultFileMimeType = "";
-	var _defaultActionMimeType = "";
-	var _documentRoot = "";
-	var _listenPort = 0;
-	var _moduleDir = "";
-	var _exts = new Array();
-	var _bins = new Array();
-	var _errorDocs = {};
-
 	// Parse all config files
 	parseConfigFile("./conf/httpd.conf");
 	
 	// Remove potential postslash from the docroot
-	if (_documentRoot.substring(_documentRoot.length - 2) == "/")
-		_documentRoot = _documentRoot.substring(_documentRoot.length - 2);
+	if (sys.config.document_root.substring(sys.config.document_root.length - 2) == "/")
+		sys.config.document_root = sys.config.document_root.substring(sys.config.document_root.length - 2);
 	
 	// Initialize all modules
 	for (var i in mods) {
@@ -213,16 +226,18 @@ try {
 		var errors = new Array();	
 		for (var i in mods) {
 			var cont = mods[i].receiveRequest(request, u, query, response);
-			if (cont !== true) {
-				if ('e' + cont.httpcode in _errorDocs) {
+			if (cont == null) {
+				return;
+			} else if (cont !== true) {
+				if ('e' + cont.httpcode in sys.config.error_documents) {
 					sys.respond(response,
 						cont.httpcode,
-						_defaultFileMimeType,
-						sys.fs.readFileSync(_documentRoot + "/" + _errorDocs["e" + cont.httpcode]),
+						sys.config.default_file_mime_type,
+						sys.fs.readFileSync(sys.config.document_root + "/" + sys.config.error_documents["e" + cont.httpcode]),
 						{}
 					);
 				} else {
-					sys.respond(response, cont.httpcode, _defaultFileMimeType, "", {});
+					sys.respond(response, cont.httpcode, sys.config.default_file_mime_type, "", {});
 				}
 			}
 		}
@@ -232,21 +247,11 @@ try {
 			if (query.action) {
 				var ret = sys.handleAction(request, u, query, response);
 				if (ret != null)
-					sys.respond(response, 200, _defaultActionMimeType, JSON.stringify(ret.response), ret.headers);			} else {	// We got no action
-				// Work over the filename to retrieve
-				fnameParts = filename.split('/');
-				if (fnameParts[fnameParts.length - 1].indexOf('.') == -1) { // There is no . in the filename part of the path
-					// Append a trailing slash if it's not there
-					if (filename.charAt(filename.length - 1) != '/') {
-						filename += '/';
-						sys.respond(response, 302, "", "", {"Location":filename});
-					}
-					// If there's still no filename, add the default
-					if (filename.charAt(filename.length - 1) == '/') filename += _defaultFile;
-				}
-				filename = _documentRoot + "/" + filename;
-				mimetype = sys.getMimeType(filename, _exts);
-				if (mimetype == null) mimetype = _defaultFileMimeType;
+					sys.respond(response, 200, sys.config.default_action_mime_type, JSON.stringify(ret.response), ret.headers);
+				} else {	// We got no action
+				filename = sys.parseFilename(filename);
+				mimetype = sys.getMimeType(filename);
+				if (mimetype == null) mimetype = sys.config.default_file_mime_type;
 				sys.logger.stdout("Request from " + request.connection.remoteAddress + ": " + request.url + " -> " + filename + " (" + mimetype + ")");
 			
 				try {
@@ -255,16 +260,16 @@ try {
 				} catch (e) {	// Bad file?
 					sys.logger.stderr(e);
 					sys.logger.stderr("[ERR] Error serving request for " + filename);
-					if ("e404" in _errorDocs) {
-						var errorFileName = _documentRoot + "/" + _errorDocs["e404"];
+					if ("e404" in sys.config.error_documents) {
+						var errorFileName = sys.config.document_root + "/" + sys.config.error_documents["e404"];
 						sys.respond(response,
 							404,
-							sys.getMimeType(errorFileName, _exts),
+							sys.getMimeType(errorFileName),
 							sys.fs.readFileSync(errorFileName),
 							{}
 						);
 					} else {
-						sys.respond(response, 404, _defaultFileMimeType, "", {});
+						sys.respond(response, 404, sys.config.default_file_mime_type, "", {});
 					}
 				}
 			}
@@ -273,9 +278,9 @@ try {
 			for (var i in errors)
 				sys.logger.stderr("\t" + errors[i]);
 		}
-	}).listen(_listenPort);
+	}).listen(sys.config.listen_port);
 	
-	sys.logger.stdout('HTTP daemon running on port ' + _listenPort);
+	sys.logger.stdout('HTTP daemon running on port ' + sys.config.listen_port);
 } catch(e) {
 	sys.logger.stderr("[ERR] Could not start server: " + e);
 }
