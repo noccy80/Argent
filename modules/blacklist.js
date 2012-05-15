@@ -16,7 +16,7 @@ mods.blacklist = {
 		return 0;
 	},
 
-	receiveRequest:function(r, u, q){
+	receiveRequest:function(r, u, q, res){
 		var inList = false;
 		for (var i in this.config.list)
 			if (this.config.list[i] == r.connection.remoteAddress)

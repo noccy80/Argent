@@ -23,7 +23,7 @@ mods.session = {
 	
 	init:function(){return 0;},
 	
-	receiveRequest:function(r, u, q){return true;},
+	receiveRequest:function(r, u, q, res){return true;},
 	
 	shutdown:function(){},
 	 

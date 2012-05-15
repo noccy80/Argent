@@ -12,7 +12,6 @@ sys.fs = require('fs');
 sys.path = require('path');
 sys.config = {
 	"server_url":"",
-	"server_root":"/var/argent/",
 	"default_conf_file":"conf/httpd.conf"
 };
 
@@ -153,10 +152,6 @@ function parseConfigFile(file) {
 				}
 			}
 			
-			// Set server root
-			if (pair[0] == "server_root")
-				sys.config.server_root = pair[1];
-			
 			// Set server URL
 			if (pair[0] == "server_url")
 				sys.config.server_url = pair[1];
@@ -217,7 +212,7 @@ try {
 		// receiveRequest trigger
 		var errors = new Array();	
 		for (var i in mods) {
-			var cont = mods[i].receiveRequest(request, u, query);
+			var cont = mods[i].receiveRequest(request, u, query, response);
 			if (cont !== true) {
 				if ('e' + cont.httpcode in _errorDocs) {
 					sys.respond(response,
