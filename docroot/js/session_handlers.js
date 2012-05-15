@@ -60,39 +60,4 @@ function btnGet_click() {
 	});
 }
 
-function btnSave_click() {
-	$.ajax({
-		url:ajaxUrl,
-		type:"GET",
-		dataType:"json",
-		data:{
-			"action":"session@savecache"
-		},
-		success:function(data, status, xhr) {
-			$("#pStatus").text("Saved the session cache to disk.");
-		},
-		error:function(xhr, status, error) {
-			$("#pStatus").text("Error saving the session cache.");
-		}
-	});
-}
-
-function btnSnapshot_click() {
-	$.ajax({
-		url:ajaxUrl,
-		type:"GET",
-		dataType:"json",
-		data:{
-			"action":"session@savesnapshot",
-			"label":$("#txtLabel").val()
-		},
-		success:function(data, status, xhr) {
-			$("#pStatus").text("Saved the snapshot.");
-		},
-		error:function(xhr, status, error) {
-			$("#pStatus").text("Error saving the snapshot.");
-		}
-	});
-}
-
 var ajaxUrl = "http://%SERVER_URL%:%LISTEN_PORT%";
