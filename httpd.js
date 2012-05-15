@@ -149,7 +149,7 @@ function parseConfigFile(file) {
 				if (pair[1].charAt(0) == "/") {
 					parseConfigFile(pair[1]);
 				} else {
-					parseConfigFile(sys.config.server_root + pair[1]);
+					parseConfigFile(pair[1]);
 				}
 			}
 			
