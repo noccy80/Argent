@@ -12,6 +12,7 @@ mods.blacklist = {
 
 	init:function(){
 		this.reload();
+		sys.fs.watchFile(this.config.list_file, function(){mods.blacklist.reload();});
 		sys.logger.stdout("Blacklist module initialized");
 		return 0;
 	},
@@ -36,6 +37,8 @@ mods.blacklist = {
 	shutdown:function(){},
 
 	reload:function() {
+		sys.logger.stdout("Blacklist :: Loading list...");
 		this.config.list = sys.fs.readFileSync(this.config.list_file, "UTF-8").split('\n');
+		sys.logger.stdout("Blacklist :: List loaded.");
 	}
 };

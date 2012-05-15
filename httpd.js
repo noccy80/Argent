@@ -8,12 +8,15 @@ sys.logger = new logging();
 sys.http = {};
 sys.http.http = require('http');
 sys.http.url = require('url');
+sys.https = require('https');
 sys.fs = require('fs');
 sys.path = require('path');
+sys.crypto = require('crypto');
 sys.config = {
 	"server_url":"",
 	"default_conf_file":"conf/httpd.conf",
 	"listen_port":12321,
+	"ssl_listen_port":443,
 	"default_file":"index.html",
 	"default_file_mime_type":"text/html",
 	"default_action_mime_type":"application/json",
@@ -21,7 +24,10 @@ sys.config = {
 	"module_directory":"./modules",
 	"extensions":new Array(),
 	"binaries":new Array(),
-	"error_documents":{}
+	"error_documents":{},
+	"enable_ssl":false,
+	"private_key":"",
+	"certificate":""
 };
 
 // Set up basic module framework
@@ -104,6 +110,76 @@ sys.parseFilename = function(filename) {
 	return sys.config.document_root + "/" + filename;
 }
 
+function handleRequest(request, response) {
+	// Initialize things...
+	var u = sys.http.url.parse(request.url, true);
+	var query = u.query;
+	var filename = u.pathname;
+	var mimetype = null;
+
+	query.cookies = {};
+	request.headers.cookie && request.headers.cookie.split(';').forEach(function(cookie) {
+		var parts = cookie.split('=');
+		query.cookies[parts[0].trim()] = (parts[1] || '').trim();
+	});
+
+	// receiveRequest trigger
+	var errors = new Array();
+	for (var i in mods) {
+		var cont = mods[i].receiveRequest(request, u, query, response);
+		if (cont == null) {
+			return;
+		} else if (cont !== true) {
+			if ('e' + cont.httpcode in sys.config.error_documents) {
+				sys.respond(response,
+					cont.httpcode,
+					sys.config.default_file_mime_type,
+					sys.fs.readFileSync(sys.config.document_root + "/" + sys.config.error_documents["e" + cont.httpcode]),
+					{}
+				);
+			} else {
+				sys.respond(response, cont.httpcode, sys.config.default_file_mime_type, "", {});
+			}
+		}
+	}
+	if (errors.length == 0) {
+	   // Actions always override file requests
+		if (query.action) {
+			var ret = sys.handleAction(request, u, query, response);
+			if (ret != null)
+				sys.respond(response, 200, sys.config.default_action_mime_type, JSON.stringify(ret.response), ret.headers);
+			} else {	// We got no action
+			filename = sys.parseFilename(filename);
+			mimetype = sys.getMimeType(filename);
+			if (mimetype == null) mimetype = sys.config.default_file_mime_type;
+			sys.logger.stdout("Request from " + request.connection.remoteAddress + ": " + request.url + " -> " + filename + " (" + mimetype + ")");
+
+			try {
+				var body = sys.fs.readFileSync(filename);
+				sys.respond(response, 200, mimetype, body, {'Content-Type': mimetype, 'Content-Length': body.length});
+			} catch (e) {   // Bad file?
+				sys.logger.stderr(e);
+				sys.logger.stderr("[ERR] Error serving request for " + filename);
+				if ("e404" in sys.config.error_documents) {
+					var errorFileName = sys.config.document_root + "/" + sys.config.error_documents["e404"];
+					sys.respond(response,
+						404,
+						sys.getMimeType(errorFileName),
+						sys.fs.readFileSync(errorFileName),
+						{}
+					);
+				} else {
+					sys.respond(response, 404, sys.config.default_file_mime_type, "", {});
+				}
+			}
+		}
+	} else {
+		sys.logger.stderr("Could not serve request due to the following errors:");
+		for (var i in errors)
+			sys.logger.stderr("\t" + errors[i]);
+	}
+}
+
 function parseConfigFile(file) {
 	sys.logger.stdout("Config file: " + file);
 	// Read the conf file and initialize the expected variables
@@ -119,6 +195,10 @@ function parseConfigFile(file) {
 			if (pair[0] == "default_action_mime_type") sys.config.default_action_mime_type = pair[1];
 			if (pair[0] == "document_root") sys.config.document_root = pair[1];
 			if (pair[0] == "listen_port") sys.config.listen_port = parseInt(pair[1]);
+			if (pair[0] == "ssl_listen_port") sys.config.ssl_listen_port = parseInt(pair[1]);
+			if (pair[0] == "enable_ssl") sys.config.enable_ssl = true;
+			if (pair[0] == "private_key") sys.config.private_key = pair[1];
+			if (pair[0] == "certificate") sys.config.certificate = pair[1];
 			
 			// Load ext/mimetype table entry
 			if (pair[0] == "ext") {
@@ -209,78 +289,18 @@ try {
 		}
 	}
 
-	sys.http.http.createServer(function (request, response) {
-		// Initialize things...
-		var u = sys.http.url.parse(request.url, true);
-		var query = u.query;
-		var filename = u.pathname;
-		var mimetype = null;
-		
-		query.cookies = {};
-		request.headers.cookie && request.headers.cookie.split(';').forEach(function(cookie) {
-			var parts = cookie.split('=');
-			query.cookies[parts[0].trim()] = (parts[1] || '').trim();
-		});
-	
-		// receiveRequest trigger
-		var errors = new Array();	
-		for (var i in mods) {
-			var cont = mods[i].receiveRequest(request, u, query, response);
-			if (cont == null) {
-				return;
-			} else if (cont !== true) {
-				if ('e' + cont.httpcode in sys.config.error_documents) {
-					sys.respond(response,
-						cont.httpcode,
-						sys.config.default_file_mime_type,
-						sys.fs.readFileSync(sys.config.document_root + "/" + sys.config.error_documents["e" + cont.httpcode]),
-						{}
-					);
-				} else {
-					sys.respond(response, cont.httpcode, sys.config.default_file_mime_type, "", {});
-				}
-			}
-		}
+	sys.http.http.createServer(handleRequest).listen(sys.config.listen_port);
 
-		if (errors.length == 0) {
-			// Actions always override file requests
-			if (query.action) {
-				var ret = sys.handleAction(request, u, query, response);
-				if (ret != null)
-					sys.respond(response, 200, sys.config.default_action_mime_type, JSON.stringify(ret.response), ret.headers);
-				} else {	// We got no action
-				filename = sys.parseFilename(filename);
-				mimetype = sys.getMimeType(filename);
-				if (mimetype == null) mimetype = sys.config.default_file_mime_type;
-				sys.logger.stdout("Request from " + request.connection.remoteAddress + ": " + request.url + " -> " + filename + " (" + mimetype + ")");
-			
-				try {
-					var body = sys.fs.readFileSync(filename);
-					sys.respond(response, 200, mimetype, body, {'Content-Type': mimetype, 'Content-Length': body.length});
-				} catch (e) {	// Bad file?
-					sys.logger.stderr(e);
-					sys.logger.stderr("[ERR] Error serving request for " + filename);
-					if ("e404" in sys.config.error_documents) {
-						var errorFileName = sys.config.document_root + "/" + sys.config.error_documents["e404"];
-						sys.respond(response,
-							404,
-							sys.getMimeType(errorFileName),
-							sys.fs.readFileSync(errorFileName),
-							{}
-						);
-					} else {
-						sys.respond(response, 404, sys.config.default_file_mime_type, "", {});
-					}
-				}
-			}
-		} else {
-			sys.logger.stderr("Could not serve request due to the following errors:");
-			for (var i in errors)
-				sys.logger.stderr("\t" + errors[i]);
-		}
-	}).listen(sys.config.listen_port);
+	if (sys.config.enable_ssl) {
+		sys.https.createServer({
+			key:sys.fs.readFileSync(sys.config.private_key),
+			cert:sys.fs.readFileSync(sys.config.certificate)
+		}, handleRequest).listen(sys.config.ssl_listen_port);
+	}
 	
 	sys.logger.stdout('HTTP daemon running on port ' + sys.config.listen_port);
+	if (sys.config.enable_ssl)
+		sys.logger.stdout('HTTPS daemon running on port ' + sys.config.ssl_listen_port);
 } catch(e) {
 	sys.logger.stderr("[ERR] Could not start server: " + e);
 }
