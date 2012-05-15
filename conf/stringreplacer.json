@@ -1,0 +1,7 @@
+{
+	"replacements": {
+		"SERVER_URL":"sys.config.server_url",
+		"LISTEN_PORT":"sys.config.listen_port"
+	},
+	"mimetypes":["text/html", "text/javascript"]
+}
