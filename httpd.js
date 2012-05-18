@@ -21,7 +21,7 @@ sys.config = {
 	"default_file_mime_type":"text/html",
 	"default_action_mime_type":"application/json",
 	"document_root":"./docroot",
-	"module_directory":"./modules",
+	"plugin_directory":"./plugins",
 	"extensions":new Array(),
 	"binaries":new Array(),
 	"error_documents":{},
@@ -214,18 +214,18 @@ function parseConfigFile(file) {
 					sys.config.binaries.push(parts[j]);
 			}
 			
-			// Set the module directory
-			if (pair[0] == "module_dir") {
-				sys.config.module_directory = pair[1];
-				if (sys.config.module_directory.substring(sys.config.module_directory.length - 2) == "/")
-					sys.config.module_directory = sys.config.module_directory.substring(sys.config.module_directory.length - 2);
+			// Set the plugin directory
+			if (pair[0] == "plugin_dir") {
+				sys.config.plugin_directory = pair[1];
+				if (sys.config.plugin_directory.substring(sys.config.plugin_directory.length - 2) == "/")
+					sys.config.plugin_directory = sys.config.plugin_directory.substring(sys.config.plugin_directory.length - 2);
 			}
 			
-			// Load a module/handler
-			if (pair[0] == "handler" || pair[0] == "mod") {
-				var details = pair[1].split(',');  // 0 = handler file; 1 = module it handles
-				var mod_file = sys.config.module_directory + "/" + details[0] + ".js";
-				require(mod_file);
+			// Load a plugin/handler
+			if (pair[0] == "handler" || pair[0] == "plugic") {
+				var details = pair[1].split(',');  // 0 = handler file; 1 = plugin it handles
+				var plugin_file = sys.config.plugin_directory + "/" + details[0] + ".js";
+				require(plugin_file);
 				
 				if (pair[0] == "handler")
 					eval("sys.handlers['" + details[1] + "'] = mods." + details[1] + ".handler;");
