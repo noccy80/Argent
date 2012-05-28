@@ -222,7 +222,7 @@ function parseConfigFile(file) {
 			}
 			
 			// Load a plugin/handler
-			if (pair[0] == "handler" || pair[0] == "plugic") {
+			if (pair[0] == "handler" || pair[0] == "plugin") {
 				var details = pair[1].split(',');  // 0 = handler file; 1 = plugin it handles
 				var plugin_file = sys.config.plugin_directory + "/" + details[0] + ".js";
 				require(plugin_file);
