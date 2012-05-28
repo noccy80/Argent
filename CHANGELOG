@@ -1,3 +1,0 @@
-Moved request response code to a separate function and updated all cases
-within httpd.js where responses get sent to use this function instead.
-This function is sys.respond(httpcode, mimetype, body, headers);
