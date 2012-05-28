@@ -220,17 +220,21 @@ function parseConfigFile(file) {
 				if (sys.config.plugin_directory.substring(sys.config.plugin_directory.length - 2) == "/")
 					sys.config.plugin_directory = sys.config.plugin_directory.substring(sys.config.plugin_directory.length - 2);
 			}
-			
-			// Load a plugin/handler
-			if (pair[0] == "handler" || pair[0] == "plugin") {
+
+			// Load a handler
+			if (pair[0] == "handler") {
 				var details = pair[1].split(',');  // 0 = handler file; 1 = plugin it handles
-				var plugin_file = sys.config.plugin_directory + "/" + details[0] + ".js";
+				var handler_file = sys.config.plugin_directory + "/" + details[1] + "/" + details[0] + ".js";
+				require(handler_file);
+				eval("sys.handlers['" + details[1] + "'] = mods." + details[1] + ".handler;");
+				sys.logger.stdout("Loaded handler '" + details[0] + "' to control plugin'" + details[1] + "'");
+			}
+			
+			// Load a plugin
+			if (pair[0] == "plugin") {
+				var plugin_file = sys.config.plugin_directory + "/" + pair[1] + "/" + pair[1] + ".js";
 				require(plugin_file);
-				
-				if (pair[0] == "handler")
-					eval("sys.handlers['" + details[1] + "'] = mods." + details[1] + ".handler;");
-					
-				sys.logger.stdout("Loaded module '" + pair[1] + "' from " + mod_file);
+				sys.logger.stdout("Loaded module '" + pair[1] + "' from " + plugin_file);
 			}
 
 			// Set a variable
