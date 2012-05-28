@@ -1,4 +1,4 @@
-mods.session.handler = {
+plugins.session.handler = {
 	
 	resp:{
 		headers:{"content-type":"application/json"},
@@ -17,34 +17,34 @@ mods.session.handler = {
 		switch(a) {
 			case "start":
 				sys.logger.stdout(JSON.stringify(this));
-				this.resp.response = mods.session.start();
+				this.resp.response = plugins.session.start();
 				this.resp.headers['set-cookie'] =
 					"sid=" + this.resp.response.sid + ";expires=" + this.resp.response.expires;
 				break;
 			case "stop":
 				var d = new Date();
 				d.setTime(d.getTime() - 24 * 60 * 60 * 1000);	// To expire the cookie, make it old
-				this.resp.response = mods.session.stop(q.cookies.sid);
+				this.resp.response = plugins.session.stop(q.cookies.sid);
 				this.resp.headers['set-cookie'] = "sid=0;expires=" + d.toUTCString();
 				break;
 			case "renew":
-				sys.logger.stdout(mods.session.config.disable_get);
-				this.resp.response = mods.session.renew(q.cookies.sid);
+				sys.logger.stdout(plugins.session.config.disable_get);
+				this.resp.response = plugins.session.renew(q.cookies.sid);
 				this.resp.headers['set-cookie'] =
 					"sid=" + this.resp.response.sid + ";expires=" + this.resp.response.expires;
 				break;
 			case "set":
-				this.resp.response = mods.session.set(q.cookies.sid, q.key, q.value);
-				if (mods.session.config.renew_on_set) {
-					var renewData = mods.session.renew(q.cookies.sid);
+				this.resp.response = plugins.session.set(q.cookies.sid, q.key, q.value);
+				if (plugins.session.config.renew_on_set) {
+					var renewData = plugins.session.renew(q.cookies.sid);
 					this.resp.headers['set-cookie'] =
 						"sid=" + renewData.sid + ";expires=" + renewData.expires;
 				}
 				break;
 			case "get":
-				this.resp.response = mods.session.get(q.cookies.sid, q.key);
-				if (mods.session.config.renew_on_get) {
-					var renewData = mods.session.renew(q.cookies.sid);
+				this.resp.response = plugins.session.get(q.cookies.sid, q.key);
+				if (plugins.session.config.renew_on_get) {
+					var renewData = plugins.session.renew(q.cookies.sid);
 					this.resp.headers['set-cookie'] =
 						"sid=" + renewData.sid + ";expires=" + renewData.expires;
 				}
@@ -57,11 +57,11 @@ mods.session.handler = {
 };
 
 // Init
-if (!mods.session.config.disable_get) {
-	mods.session.handler.handles.push("get");
+if (!plugins.session.config.disable_get) {
+	plugins.session.handler.handles.push("get");
 	sys.logger.stdout("Session module: enabling get");
 }
-if (!mods.session.config.disable_set) {
-	mods.session.handler.handles.push("set");
+if (!plugins.session.config.disable_set) {
+	plugins.session.handler.handles.push("set");
 	sys.logger.stdout("Session module: enabling set");
 }

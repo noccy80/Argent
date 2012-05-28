@@ -1,4 +1,4 @@
-mods.stringreplacer = {
+plugins.stringreplacer = {
 	
 	config:{
 		match_file:"./plugins/stringreplacer/stringreplacer.json",

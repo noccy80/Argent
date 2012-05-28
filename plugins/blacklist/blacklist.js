@@ -3,7 +3,7 @@
  * from IP addresses listed in blacklist.conf
  */
 
-mods.blacklist = {
+plugins.blacklist = {
 	config:{
 		whitelist_behavior:false,
 		list_file:"./conf/blacklist.list",
@@ -12,7 +12,7 @@ mods.blacklist = {
 
 	init:function(){
 		this.reload();
-		sys.fs.watchFile(this.config.list_file, function(){mods.blacklist.reload();});
+		sys.fs.watchFile(this.config.list_file, function(){plugins.blacklist.reload();});
 		sys.logger.stdout("Blacklist module initialized");
 		return 0;
 	},

@@ -31,7 +31,7 @@ sys.config = {
 };
 
 // Set up basic module framework
-GLOBAL.mods = {};
+GLOBAL.plugins= {};
 
 // r = The HTTP request
 // u = The parsed URL object
@@ -125,8 +125,8 @@ function handleRequest(request, response) {
 
 	// receiveRequest trigger
 	var errors = new Array();
-	for (var i in mods) {
-		var cont = mods[i].receiveRequest(request, u, query, response);
+	for (var i in plugins) {
+		var cont = plugins[i].receiveRequest(request, u, query, response);
 		if (cont == null) {
 			return;
 		} else if (cont !== true) {
@@ -226,7 +226,7 @@ function parseConfigFile(file) {
 				var details = pair[1].split(',');  // 0 = handler file; 1 = plugin it handles
 				var handler_file = sys.config.plugin_directory + "/" + details[1] + "/" + details[0] + ".js";
 				require(handler_file);
-				eval("sys.handlers['" + details[1] + "'] = mods." + details[1] + ".handler;");
+				eval("sys.handlers['" + details[1] + "'] = plugins." + details[1] + ".handler;");
 				sys.logger.stdout("Loaded handler '" + details[0] + "' to control plugin'" + details[1] + "'");
 			}
 			
@@ -270,8 +270,8 @@ function parseConfigFile(file) {
 // Exit sequence
 process.on("SIGINT", function() {
 	sys.logger.stdout("Shutting down...");
-	for (var i in mods)
-		mods[i].shutdown();
+	for (var i in plugins)
+		plugins[i].shutdown();
 	process.exit(0);
 });
 
@@ -285,8 +285,8 @@ try {
 		sys.config.document_root = sys.config.document_root.substring(sys.config.document_root.length - 2);
 	
 	// Initialize all modules
-	for (var i in mods) {
-		var initCode = mods[i].init();
+	for (var i in plugins) {
+		var initCode = plugins[i].init();
 		if (initCode != 0) {
 			sys.logger.stderr(initCode);
 			exit(initCode);

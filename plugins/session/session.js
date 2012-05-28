@@ -6,7 +6,7 @@
  */
 
 // The main session data object
-mods.session = {
+plugins.session = {
 	config:{
 		disable_get:false,
 		disable_set:false,
