@@ -14,7 +14,7 @@ sys.path = require('path');
 sys.crypto = require('crypto');
 sys.config = {
 	"server_url":"",
-	"default_conf_file":"conf/httpd.conf",
+	"default_conf_file":"./httpd.conf",
 	"listen_port":12321,
 	"ssl_listen_port":443,
 	"default_file":"index.html",
@@ -278,7 +278,7 @@ process.on("SIGINT", function() {
 // Run the server itself
 try {
 	// Parse all config files
-	parseConfigFile("./conf/httpd.conf");
+	parseConfigFile(sys.config.default_conf_file);
 	
 	// Remove potential postslash from the docroot
 	if (sys.config.document_root.substring(sys.config.document_root.length - 2) == "/")

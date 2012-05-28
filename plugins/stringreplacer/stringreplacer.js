@@ -1,7 +1,7 @@
 mods.stringreplacer = {
 	
 	config:{
-		match_file:"./conf/stringreplacer.json",
+		match_file:"./plugins/stringreplacer/stringreplacer.json",
 		replacements:{},
 		mimetypes:new Array()
 	},
