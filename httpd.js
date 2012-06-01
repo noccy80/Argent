@@ -183,7 +183,8 @@ function handleRequest(request, response) {
 function parseConfigFile(file) {
 	sys.logger.stdout("Config file: " + file);
 	// Read the conf file and initialize the expected variables
-	var _confContent = sys.fs.readFileSync(file, "UTF-8").split('\n');
+	var delimiter = (process.platform === "win32" ? "\r\n" : "\n");
+	var _confContent = sys.fs.readFileSync(file, "UTF-8").split(delimiter);
 	
 	// Look at each line of the conf file
 	for (var i = 0; i < _confContent.length; ++i) {

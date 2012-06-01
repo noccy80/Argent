@@ -7,7 +7,7 @@
 function btnStart_click() {
 	// Fuck IE.
 	var xhrStart = new XMLHttpRequest();
-	xhrStart.open('GET', ajaxUrl + "?action=session@renew", true);
+	xhrStart.open('POST', ajaxUrl + "?action=session@renew", true);
 	xhrStart.onerror = function(e){
 		alert("Could not start a session.");
 	};
@@ -23,7 +23,7 @@ function btnSet_click() {
 	var xhrSet = new XMLHttpRequest();
 	var key = document.getElementById("txtKey").value;
 	var val = document.getElementById("txtData").value;
-	xhrSet.open('GET', ajaxUrl + "?action=session@set&key=" + key + "&value=" + val, true);
+	xhrSet.open('POST', ajaxUrl + "?action=session@set&key=" + key + "&value=" + val, true);
 	xhrSet.onerror = function(e) {
 		alert("Could not set key.");
 	};
@@ -34,7 +34,7 @@ function btnSet_click() {
 function btnGet_click() {
 	var xhrGet = new XMLHttpRequest();
 	var key = document.getElementById("txtKeyGet").value;
-	xhrGet.open('GET', ajaxUrl + "?action=session@get&key=" + key, true);
+	xhrGet.open('POST', ajaxUrl + "?action=session@get&key=" + key, true);
 	xhrGet.onerror = function(e) {
 		alert("Could not get key.");
 	};
