@@ -1,10 +1,6 @@
-// Built-in support from our own external files
-require('./logging.js');
-
 // Set up core framework
 GLOBAL.sys = {};
 sys.handlers = new Array();
-sys.logger = new logging();
 sys.http = {};
 sys.http.http = require('http');
 sys.http.url = require('url');
@@ -13,7 +9,7 @@ sys.fs = require('fs');
 sys.path = require('path');
 sys.crypto = require('crypto');
 sys.config = {
-	"server_url":"",
+	"server_url":"localhost",
 	"default_conf_file":"./httpd.conf",
 	"listen_port":12321,
 	"ssl_listen_port":443,
@@ -22,15 +18,44 @@ sys.config = {
 	"default_action_mime_type":"application/json",
 	"document_root":"./docroot",
 	"plugin_directory":"./plugins",
-	"extensions":new Array(),
-	"binaries":new Array(),
+	"extensions":{},
+	"binaries":[],
 	"error_documents":{},
 	"enable_ssl":false,
 	"private_key":"",
-	"certificate":""
+	"certificate":"",
+	"message_types":["core"],
+	"default_message_type":"core"
 };
 
-// Set up basic module framework
+// System core logging object
+sys.logger = {
+	
+	log:function(message, type, destination) {
+		
+		if (type == null) type = sys.config.default_message_type;
+		
+		if (type in toObject(sys.config.message_types)) {
+			switch (destination) {
+				case "stdin":
+					console.error(sys.logger.now() + " | " + message);
+					break
+				default:
+					console.log(sys.logger.now() + " | " + message);
+			}
+		}
+	},
+
+	now:function() {
+		var d = new Date();
+		return "(" + (d.getMonth() + 1) + "-" + d.getDate() + "-" + d.getFullYear() +
+			" " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds() +
+			":" + d.getMilliseconds() + ")";
+	}
+
+};
+
+// Set up basic plugin framework
 GLOBAL.plugins= {};
 
 // r = The HTTP request
@@ -39,30 +64,30 @@ GLOBAL.plugins= {};
 // response = The response object
 sys.handleAction = function(r, u, q, response) {
 	var a = q.action.toLowerCase();
-	var moduleName = a.split('@')[0];
+	var pluginName = a.split('@')[0];
 	var action = a.split('@')[1];
 	var ret = {};
-	sys.logger.stdout("Action request\n\tModule: " + moduleName + "\n\tAction: " + action + "\n\tParameters: " + u.search);
-	sys.logger.stdout(JSON.stringify(q));
-	if (eval("sys.handlers['" + moduleName + "']")) {
-		eval("var handler = sys.handlers['" + moduleName + "']");
+	sys.logger.log("Action request\n\tPlugin: " + pluginName + "\n\tAction: " + action + "\n\tParameters: " + u.search);
+	sys.logger.log(JSON.stringify(q));
+	if (eval("sys.handlers['" + pluginName + "']")) {
+		eval("var handler = sys.handlers['" + pluginName + "']");
 		
 		if (handler.handlesAction(action)) {
 			ret = handler.handle(action, r, q, response);
 			if (ret != null) {
-				sys.logger.stdout(JSON.stringify(ret));
+				sys.logger.log(JSON.stringify(ret));
 				ret.headers['content-length'] = JSON.stringify(ret.response).length;
-				sys.logger.stdout("Response: " + JSON.stringify(ret.response));
+				sys.logger.log("Response: " + JSON.stringify(ret.response));
 			}
 		} else {	// Module can't handle the action, much like your mom
-			sys.logger.stderr("[ERR] The `" + moduleName + "` module cannot handle action `" + action + "`.");
+			sys.logger.log("[ERR] The `" + pluginName + "` plugin cannot handle action `" + action + "`.");
 			ret.headers = {"content-type":"application/json"};
-			ret.response = {"error":"[ERR] The `" + moduleName + "` module is not loaded."};
+			ret.response = {"error":"[ERR] The `" + pluginName + "` plugin is not loaded."};
 		}
 	} else {	// Module doesn't exist
-		sys.logger.stderr("[ERR] The `" + moduleName + "` module is not loaded.");
+		sys.logger.log("[ERR] The `" + pluginName + "` plugin is not loaded.");
 		ret.headers = {"content-type":"application/json"};
-		ret.response = {"error":"[ERR] The `" + moduleName + "` module is not loaded."};
+		ret.response = {"error":"[ERR] The `" + pluginName + "` plugin is not loaded."};
 	}
 	return ret;
 };
@@ -108,6 +133,13 @@ sys.parseFilename = function(filename) {
 		if (filename.charAt(filename.length - 1) == '/') filename += sys.config.default_file;
 	}
 	return sys.config.document_root + "/" + filename;
+};
+
+function toObject(arr) {
+	var obj = {};
+	for(var i = 0; i < arr.length; ++i)
+		obj[arr[i]]='';
+	return obj;
 }
 
 function handleRequest(request, response) {
@@ -152,14 +184,14 @@ function handleRequest(request, response) {
 			filename = sys.parseFilename(filename);
 			mimetype = sys.getMimeType(filename);
 			if (mimetype == null) mimetype = sys.config.default_file_mime_type;
-			sys.logger.stdout("Request from " + request.connection.remoteAddress + ": " + request.url + " -> " + filename + " (" + mimetype + ")");
+			sys.logger.log("Request from " + request.connection.remoteAddress + ": " + request.url + " -> " + filename + " (" + mimetype + ")");
 
 			try {
 				var body = sys.fs.readFileSync(filename);
 				sys.respond(response, 200, mimetype, body, {'Content-Type': mimetype, 'Content-Length': body.length});
 			} catch (e) {   // Bad file?
-				sys.logger.stderr(e);
-				sys.logger.stderr("[ERR] Error serving request for " + filename);
+				sys.logger.log(e);
+				sys.logger.log("[ERR] Error serving request for " + filename);
 				if ("e404" in sys.config.error_documents) {
 					var errorFileName = sys.config.document_root + "/" + sys.config.error_documents["e404"];
 					sys.respond(response,
@@ -174,14 +206,14 @@ function handleRequest(request, response) {
 			}
 		}
 	} else {
-		sys.logger.stderr("Could not serve request due to the following errors:");
+		sys.logger.log("Could not serve request due to the following errors:");
 		for (var i in errors)
-			sys.logger.stderr("\t" + errors[i]);
+			sys.logger.log("\t" + errors[i]);
 	}
 }
 
 function parseConfigFile(file) {
-	sys.logger.stdout("Config file: " + file);
+	sys.logger.log("Config file: " + file);
 	// Read the conf file and initialize the expected variables
 	var delimiter = (process.platform === "win32" ? "\r\n" : "\n");
 	var _confContent = sys.fs.readFileSync(file, "UTF-8").split(delimiter);
@@ -228,20 +260,20 @@ function parseConfigFile(file) {
 				var handler_file = sys.config.plugin_directory + "/" + details[1] + "/" + details[0] + ".js";
 				require(handler_file);
 				eval("sys.handlers['" + details[1] + "'] = plugins." + details[1] + ".handler;");
-				sys.logger.stdout("Loaded handler '" + details[0] + "' to control plugin'" + details[1] + "'");
+				sys.logger.log("Loaded handler '" + details[0] + "' to control plugin'" + details[1] + "'");
 			}
 			
 			// Load a plugin
 			if (pair[0] == "plugin") {
 				var plugin_file = sys.config.plugin_directory + "/" + pair[1] + "/" + pair[1] + ".js";
 				require(plugin_file);
-				sys.logger.stdout("Loaded module '" + pair[1] + "' from " + plugin_file);
+				sys.logger.log("Loaded module '" + pair[1] + "' from " + plugin_file);
 			}
 
 			// Set a variable
 			if (pair[0] == "var") {
 				var varparts = pair[1].split(',');
-				sys.logger.stdout("Setting variable: " + varparts[0] + " = " + varparts[1]);
+				sys.logger.log("Setting variable: " + varparts[0] + " = " + varparts[1]);
 				eval(varparts[0] + " = " + varparts[1] + ";");
 			}
 			
@@ -249,7 +281,7 @@ function parseConfigFile(file) {
 			if (pair[0] == "error_document") {
 				var edocparts = pair[1].split(',');
 				eval("sys.config.error_documents.e" + edocparts[0] + " = \"" + edocparts[1] + "\";");
-				sys.logger.stdout("Setting error document for error " + edocparts[0] + " to " + edocparts[1]);
+				sys.logger.log("Setting error document for error " + edocparts[0] + " to " + edocparts[1]);
 			}
 			
 			// Include another config file
@@ -264,13 +296,21 @@ function parseConfigFile(file) {
 			// Set server URL
 			if (pair[0] == "server_url")
 				sys.config.server_url = pair[1];
+			
+			// Log message types
+			if (pair[0] == "message_types")
+				sys.config.message_types = pair[1].split(',');
+			
+			// Default log message type
+			if (pair[0] == "default_message_type")
+				sys.config.default_message_type = pair[1];
 		}
 	}
 }
 
 // Exit sequence
 process.on("SIGINT", function() {
-	sys.logger.stdout("Shutting down...");
+	sys.logger.log("Shutting down...");
 	for (var i in plugins)
 		plugins[i].shutdown();
 	process.exit(0);
@@ -289,7 +329,7 @@ try {
 	for (var i in plugins) {
 		var initCode = plugins[i].init();
 		if (initCode != 0) {
-			sys.logger.stderr(initCode);
+			sys.logger.log(initCode);
 			exit(initCode);
 		}
 	}
@@ -303,9 +343,9 @@ try {
 		}, handleRequest).listen(sys.config.ssl_listen_port);
 	}
 	
-	sys.logger.stdout('HTTP daemon running on port ' + sys.config.listen_port);
+	sys.logger.log('HTTP daemon running on port ' + sys.config.listen_port);
 	if (sys.config.enable_ssl)
-		sys.logger.stdout('HTTPS daemon running on port ' + sys.config.ssl_listen_port);
+		sys.logger.log('HTTPS daemon running on port ' + sys.config.ssl_listen_port);
 } catch(e) {
-	sys.logger.stderr("[ERR] Could not start server: " + e);
+	sys.logger.log("[ERR] Could not start server: " + e);
 }

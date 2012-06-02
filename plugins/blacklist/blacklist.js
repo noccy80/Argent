@@ -13,7 +13,7 @@ plugins.blacklist = {
 	init:function(){
 		this.reload();
 		sys.fs.watchFile(this.config.list_file, function(){plugins.blacklist.reload();});
-		sys.logger.stdout("Blacklist module initialized");
+		sys.logger.log("Blacklist module initialized");
 		return 0;
 	},
 
@@ -37,8 +37,8 @@ plugins.blacklist = {
 	shutdown:function(){},
 
 	reload:function() {
-		sys.logger.stdout("Blacklist :: Loading list...");
+		sys.logger.log("Blacklist :: Loading list...");
 		this.config.list = sys.fs.readFileSync(this.config.list_file, "UTF-8").split('\n');
-		sys.logger.stdout("Blacklist :: List loaded.");
+		sys.logger.log("Blacklist :: List loaded.");
 	}
 };
