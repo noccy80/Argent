@@ -95,7 +95,7 @@ plugins.session = {
 			this.session[id].expires.setTime(
 				d.getTime() + parseFloat(this.config.timeout_seconds) * 1000
 			);
-			sys.logger.log(parseFloat(this.config.timeout_seconds) * 1000);
+			sys.logger.log((parseFloat(this.config.timeout_seconds) * 1000).toString());
 			this.session[id].timer = setTimeout(function() {
 				this.stop(id);
 			}, parseFloat(this.config.timeout_seconds) * 1000);

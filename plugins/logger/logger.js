@@ -2,72 +2,71 @@ plugins.logger = {
     
     // Default file logging format looks like this:
     // 02Jun2012-16:12:46.015 | Message!
-    config_file:"./plugins/logger/logger.json"
+    config_file:"./plugins/logger/logger.json",
     config:{},
-	
+
     init:function(){
 		sys.logger = this;
 		
-		this.config = JSON.parse(sys.fs.readFileSync(this.config.match_file, "UTF-8"));
+		this.config = JSON.parse(sys.fs.readFileSync(this.config_file, "UTF-8"));
 		
 		// Open any file handlers that need to be opened
 		for (var i in this.config.destinations) {
-			if (this.config.destinations[i].type == in {"text":"", "html":""}) {
+			if (this.config.destinations[i].type in {"text":"", "html":""}) {
 				for (var j in this.config.destinations[i].filters) {
-					this.config.destinations[i].filters[j].write_stream =
-						fs.createWriteStream(this.config.destinations[i].filters[j].path);
+					this.config.destinations[i].filters[j].file =
+						sys.fs.openSync(this.config.destinations[i].filters[j].path, 'a');
 				}
-				this.config.destinations[i].write_stream =
-					fs.createWriteStream(this.config.destinations[i].default_path, 'w');
-		
+				this.config.destinations[i].file =
+					sys.fs.openSync(this.config.destinations[i].default_path, 'a');
+			}
+		}
 		return 0;
 	},
 	
     receiveRequest:function(r, u, q, res){return true;},
     
-    shutdown:function(){},
-    
-    log:function(message, type, destination) {
-		var d = null;
-		if (destination in this.config.destinations) {
-			d = this.config.destinations[destination];
-		} else {
-			d = this.config.destinations[this.config.default_destiantion];
+    shutdown:function(){
+		for (var i in this.config.destinations) {
+			if (typeof(this.config.destinations[i].file) !== "undefined")
+				sys.fs.closeSync(this.config.destinations[i].file);
+			for (var j in this.config.destinations[i].filters)
+				if (typeof(this.config.destinations[i].filters[j].file) !== "undefined")
+					sys.fs.closeSync(this.config.destinations[i].filters[j].file);
 		}
+	},
+    
+    log:function(message, destination) {
+		if (typeof destination === "undefined") destination = this.config.default_destination;
+		var d = this.config.destinations[destination];
 		
 		// Supported destination types: text, html, console
 		switch (d.type) {
 			case "text":
-				var success = null;
 				for (var i in d.filters) {
 					if (message.search(d.filters[i].match) >= 0) {
-						success = d.filters[i].write_stream.write(this.now(destination) + d.separator + message + "\n");
-						if (!success) console.out("CANNOT ACCESS LOG FILE: " + d.filters[i].path + " FOR WRITING");
-						return success;
+						sys.fs.write(d.filters[i].file, this.now(destination) + d.separator + message + "\n");
+						return;
 					}
 				}
-				success = d.write_stream.stream.write(this.now(destination) + d.separator + message + "\n");
-				if (!success) console.out("CANNOT ACCESS LOG FILE: " + d.path + " FOR WRITING");
-				return success;
+				sys.fs.write(d.file, this.now(destination) + d.separator + message + "\n");
+				return;
 				break;
 			case "html":
-				var success = false;
 				for (var i in d.filters) {
 					if (message.search(d.filters[i].match) >= 0) {
-						success = d.filters[i].write_stream.write(
+						sys.fs.write(d.filters[i].file, 
 							"<p class=\"entry\"><span class=\"timestamp\">" + this.now(destination) +
-							"</span><span class=\"message\">" + message + "</span></p>";
+							"</span><span class=\"message\">" + message + "</span></p>"
 						);
-						if (!success) console.out("CANNOT ACCESS LOG FILE: " + d.path + " FOR WRITING");
-						return success;
+						return;
 					}
 				}
-				d.write_stream.stream.write(
+				sys.fs.write(d.file, 
 					"<p class=\"entry\"><span class=\"timestamp\">" + this.now(destination) +
-					"</span><span class=\"message\">" + message + "</span></p>";
+					"</span><span class=\"message\">" + message + "</span></p>"
 				);
-				if (!success) console.out("CANNOT ACCESS LOG FILE: " + d.path + " FOR WRITING");
-				return success;
+				return;
 				break;
 			case "console":
 				switch (d.path) {
@@ -95,10 +94,10 @@ plugins.logger = {
 		// Timestamps follow PHP format: http://php.net/manual/en/function.date.php
 		// For various reasons, we do not support: z, W, t, L, o, B, e, I, P, T, c, r, u
 		// Additionally, u does milliseconds, not microseconds as in PHP
-		for (var i in timestamp) {
-			switch(i) {
+		for (var i = 0; i < timestamp.length; ++i) {
+			switch(timestamp[i]) {
 				case 'd':
-					timestamp[i] = (d.getDate().toString().length == 1 : "0" + d.getDate() ? d.getDate().toString());
+					timestamp[i] = (d.getDate().toString().length == 1 ? "0" + d.getDate() : d.getDate().toString());
 					break;
 				case 'D':
 					timestamp[i] = d.getDay();
@@ -180,50 +179,50 @@ plugins.logger = {
 					}
 					break;
 				case 'm':
-					timestamp[i] = ((d.getMonth() + 1).toString().length == 1 :
-						"0" + (d.getDate() + 1).toString() ? (d.getDate() + 1).toString());
+					timestamp[i] = ((d.getMonth() + 1).toString().length == 1 ?
+						"0" + (d.getDate() + 1).toString() : (d.getDate() + 1).toString());
 					break;
 				case 'n':
 					timestamp[i] = (d.getMonth() + 1).toString();
 					break;
 				case 'Y':
-					timestamp[i] = d.getYear().toString();
+					timestamp[i] = (d.getYear() + 1900).toString();
 					break;
 				case 'y':
-					timestamp[i] = d.getYear().toString().substr(2, 2);
+					timestamp[i] = (d.getYear() + 1900).toString().substr(2, 2);
 					break;
 				case 'a':
-					timestamp[i] = (d.getHour() < 12 : "am" ? "pm");
+					timestamp[i] = (d.getHours() < 12 ? "am" : "pm");
 					break;
 				case 'A':
-					timestamp[i] = (d.getHour() < 12 : "AM" ? "PM");
+					timestamp[i] = (d.getHours() < 12 ? "AM" : "PM");
 					break;
 				case 'g':
-					var hour = d.getHour();
+					var hour = d.getHours();
 					if (hour > 12) hour -= 12;
 					if (hour == 0) hour = 12;
 					timestamp[i] = hour.toString();
 					break;
 				case 'G':
-					timestamp[1] = d.getHour().toString();
+					timestamp[1] = d.getHours().toString();
 					break;
 				case 'h':
-					var hour = d.getHour();
+					var hour = d.getHours();
 					if (hour > 12) hour -= 12;
 					if (hour == 0) hour = 12;
-					timestamp[i] = (hour.length == 1 : "0" + hour ? hour.toString());
+					timestamp[i] = (hour.length == 1 ? "0" + hour : hour.toString());
 					break;
 				case 'H':
-					timestamp[i] = (d.getHour().toString().length == 1 :
-						"0" + d.getHour() ? d.getHour().toString());
+					timestamp[i] = (d.getHours().toString().length == 1 ?
+						"0" + d.getHours() : d.getHours().toString());
 					break;
 				case 'i':
-					timestamp[i] = (d.getMinutes().toString().length == 1 :
-						"0" + d.getMinutes() ? d.getMinutes().toString();
+					timestamp[i] = (d.getMinutes().toString().length == 1 ?
+						"0" + d.getMinutes() : d.getMinutes().toString());
 					break;
 				case 's':
-					timestamp[i] = (d.getSeconds().toString().length == 1 :
-						"0" + d.getSeconds() ? d.getSeconds().toString();
+					timestamp[i] = (d.getSeconds().toString().length == 1 ?
+						"0" + d.getSeconds() : d.getSeconds().toString());
 					break;
 				case 'u':
 					timestamp[i] = d.getMilliseconds().toString();
@@ -236,6 +235,7 @@ plugins.logger = {
 					break;
 			}
 		}
+		return timestamp.join('');
 	}
 	
 };

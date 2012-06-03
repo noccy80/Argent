@@ -180,7 +180,7 @@ function handleRequest(request, response) {
 			var ret = sys.handleAction(request, u, query, response);
 			if (ret != null)
 				sys.respond(response, 200, sys.config.default_action_mime_type, JSON.stringify(ret.response), ret.headers);
-			} else {	// We got no action
+			} else {	// We got no action, unlike your mom
 			filename = sys.parseFilename(filename);
 			mimetype = sys.getMimeType(filename);
 			if (mimetype == null) mimetype = sys.config.default_file_mime_type;
