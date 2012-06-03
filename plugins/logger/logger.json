@@ -30,5 +30,5 @@
 	"default_destination":"stdout",
 	"default_timestamp_format":"dMY-h:m:s.u",
 	"default_separator":" | ",
-	"default_filter_type":"info"
+	"default_filter_type":"access"
 }

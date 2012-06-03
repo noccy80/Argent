@@ -24,18 +24,18 @@ sys.config = {
 	"enable_ssl":false,
 	"private_key":"",
 	"certificate":"",
-	"message_filter_types":["core"],
-	"default_message_filter_type":"core"
+	"message_filter_types":["access"],
+	"default_message_filter_type":"access"
 };
 
 // System core logging object
 sys.logger = {
 	
-	log:function(message, type, destination) {
+	log:function(message, message_filter_type, destination) {
 		
-		if (type == null) type = sys.config.default_message_filter_type;
+		if (message_filter_type == null) message_filter_type = sys.config.default_message_filter_type;
 		
-		if (type in sys.toObject(sys.config.message_filter_types)) {
+		if (message_filter_type in sys.toObject(sys.config.message_filter_types)) {
 			switch (destination) {
 				case "stdin":
 					console.error(sys.logger.now() + " | " + message);
