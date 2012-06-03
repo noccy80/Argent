@@ -36,46 +36,50 @@ plugins.logger = {
 		}
 	},
     
-    log:function(message, destination) {
-		if (typeof destination === "undefined") destination = this.config.default_destination;
-		var d = this.config.destinations[destination];
-		
-		// Supported destination types: text, html, console
-		switch (d.type) {
-			case "text":
-				for (var i in d.filters) {
-					if (message.search(d.filters[i].match) >= 0) {
-						sys.fs.write(d.filters[i].file, this.now(destination) + d.separator + message + "\n");
-						return;
+    log:function(message, message_filter_type, destination) {
+		if (message_filter_type == null) message_filter_type = sys.config.default_message_filter_type;
+		if (message_filter_type in sys.toObject(sys.config.message_filter_types)) {
+			if (typeof destination === "undefined") destination = this.config.default_destination;
+			var d = this.config.destinations[destination];
+			
+			// Supported destination types: text, html, console
+			switch (d.type) {
+				case "text":
+					for (var i in d.filters) {
+						if (message_filter_type == d.filters[i].message_filter_type) {
+							sys.fs.write(d.filters[i].file, this.now(destination) + d.separator + message + "\n");
+							return;
+						}
 					}
-				}
-				sys.fs.write(d.file, this.now(destination) + d.separator + message + "\n");
-				return;
-				break;
-			case "html":
-				for (var i in d.filters) {
-					if (message.search(d.filters[i].match) >= 0) {
-						sys.fs.write(d.filters[i].file, 
-							"<p class=\"entry\"><span class=\"timestamp\">" + this.now(destination) +
-							"</span><span class=\"message\">" + message + "</span></p>"
-						);
-						return;
+					sys.fs.write(d.file, this.now(destination) + d.separator + message + "\n");
+					return;
+					break;
+				case "html":
+					for (var i in d.filters) {
+						if (message_filter_type == d.filters[i].message_filter_type) {
+							sys.fs.write(d.filters[i].file, 
+								"<p class=\"entry\"><span class=\"timestamp\">" + this.now(destination) +
+								"</span><span class=\"message\">" + message + "</span></p>"
+							);
+							return;
+						}
 					}
-				}
-				sys.fs.write(d.file, 
-					"<p class=\"entry\"><span class=\"timestamp\">" + this.now(destination) +
-					"</span><span class=\"message\">" + message + "</span></p>"
-				);
-				return;
-				break;
-			case "console":
-				switch (d.path) {
-					case "stderr":
-						console.error(this.now(destination) + d.separator + message);
-						break;
-					default: console.log(this.now(destination) + d.separator + message);
-				}
-				break;
+					sys.fs.write(d.file, 
+						"<p class=\"entry\"><span class=\"timestamp\">" + this.now(destination) +
+						"</span><span class=\"message\">" + message + "</span></p>"
+					);
+					return;
+					break;
+				case "console":
+					for (var i in d.filters) {
+						if (message_filter_type != "stderr") {
+							console.log(this.now(destination) + d.separator + message);
+						} else {
+							console.err(this.now(destination) + d.separator + message);
+						}
+					}
+					break;
+			}
 		}
 	},
 	

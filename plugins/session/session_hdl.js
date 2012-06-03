@@ -57,9 +57,9 @@ plugins.session.handler = {
 // Init
 if (!plugins.session.config.disable_get) {
 	plugins.session.handler.handles.push("get");
-	sys.logger.log("Session module: enabling get");
+	sys.logger.log("Session module: enabling get", "debug");
 }
 if (!plugins.session.config.disable_set) {
 	plugins.session.handler.handles.push("set");
-	sys.logger.log("Session module: enabling set");
+	sys.logger.log("Session module: enabling set", "debug");
 }

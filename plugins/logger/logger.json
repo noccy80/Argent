@@ -3,7 +3,7 @@
 		"text_log":{
 			"type":"text",
 			"filters":[
-				{"match":"ERR", "path":"./log/error.log"},
+				{"type":"error", "path":"./log/error.log"}
 			],
 			"default_path":"./log/access.log",
 			"timestamp_format":"dMY-H:i:s.u",
@@ -12,7 +12,7 @@
 		"stdout":{
 			"type":"console",
 			"filters":[
-				{"match":"ERR", "path":"stderr"}
+				{"type":"error", "path":"stderr"}
 			],
 			"default_path":"stdout",
 			"timestamp_format":"dMY-H:i:s.u",
@@ -21,13 +21,14 @@
 		"html_log":{
 			"type":"html",
 			"filters":[
-				{"match":"ERR", "path":"./log/error.html"}
+				{"type":"error", "path":"./log/error.html"}
 			],
 			"default_path":"./log/access.html",
 			"timestamp_format":"dMY-H:i:s.u"
 		}
 	},
-	"default_destination":"text_log",
+	"default_destination":"stdout",
 	"default_timestamp_format":"dMY-h:m:s.u",
-	"default_separator":" | "
+	"default_separator":" | ",
+	"default_filter_type":"info"
 }

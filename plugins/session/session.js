@@ -35,10 +35,10 @@ plugins.session = {
 
 		this.session[id] = {};
 		this.session[id].expires = new Date();
-		sys.logger.log("Session ID: " + id);
+		sys.logger.log("Session ID: " + id, "debug");
 		if (this.renew(id).success != false)
 			return {"sid":id,"expires":this.session[id].expires.toUTCString()};
-		sys.logger.log("[ERR] pam_session : Failed to create a session.  Could not set the expiration date.");
+		sys.logger.log("pam_session : Failed to create a session.  Could not set the expiration date.", "error");
 		this.stop(id);
 		return {"success":false};
 	},
@@ -48,12 +48,12 @@ plugins.session = {
 		if (typeof this.session[id] !== "undefined") {
 			if (this.session[id].timer !== "undefined") {
 				clearTimeout(this.session[id].timer)
-				sys.logger.log("Session " + id + " went inactive and was closed.");
+				sys.logger.log("Session " + id + " went inactive and was closed.", "info");
 			}
 			delete this.session[id];
 			return {"success":true};
 		} else {
-			sys.logger.log("[ERR] pam_session : Could not stop session " + id +" because it does not exist.");
+			sys.logger.log("pam_session : Could not stop session " + id +" because it does not exist.", "error");
 			return {"success":false};
 		}
 	},
@@ -63,7 +63,7 @@ plugins.session = {
 		if (typeof this.session[id] !== "undefined") {
 			return this.session[id];
 		} else {
-			sys.logger.log("[ERR] pam_session : Attempt to retrieve a session was rejected. The session ID was invalid.");
+			sys.logger.log("pam_session : Attempt to retrieve a session was rejected. The session ID was invalid.", "error");
 			return false;
 		}
 	},
@@ -72,7 +72,7 @@ plugins.session = {
 		if (typeof this.session[id] !== "undefined") {
 			return {"value":this.session[id][key]};
 		} else {
-			sys.logger.log("[ERR] session : Attempt to retrieve a session was rejected. The session ID was invalid.");
+			sys.logger.log("session : Attempt to retrieve a session was rejected. The session ID was invalid.", "error");
 			return {"success":false};
 		}
 	},
@@ -82,7 +82,7 @@ plugins.session = {
 			this.session[id][key] = value;
 			return {"success":true};
 		} else {
-			sys.logger.log("[ERR] session : Attempt to retrieve a session was rejected. The session ID was invalid.");
+			sys.logger.log("session : Attempt to retrieve a session was rejected. The session ID was invalid.", "error");
 			return {"success":false};
 		}
 	},
@@ -91,17 +91,15 @@ plugins.session = {
 	renew:function(id) {
 		if (typeof this.session[id] !== "undefined") {
 			var d = new Date();
-			console.log(d.toUTCString());
 			this.session[id].expires.setTime(
 				d.getTime() + parseFloat(this.config.timeout_seconds) * 1000
 			);
-			sys.logger.log((parseFloat(this.config.timeout_seconds) * 1000).toString());
 			this.session[id].timer = setTimeout(function() {
 				this.stop(id);
 			}, parseFloat(this.config.timeout_seconds) * 1000);
 			return {"sid":id,"expires":this.session[id].expires.toUTCString()};
 		} else {
-			sys.logger.log("[ERR] session : Failed to renew session `" + id  + "`. Starting new session.");
+			sys.logger.log("session : Failed to renew session `" + id  + "`. Starting new session.", "info");
 			return this.start(0);
 		}
 	},
