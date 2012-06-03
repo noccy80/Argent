@@ -14,6 +14,7 @@ plugins.session.handler = {
 	},
 
 	handle:function(a, r, q, res) {
+		sys.logger.log("session_hdl handling action: " + a, "debug");
 		switch(a) {
 			case "start":
 				this.resp.response = plugins.session.start();

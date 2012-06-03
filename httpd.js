@@ -67,7 +67,7 @@ sys.handleAction = function(r, u, q, response) {
 	var pluginName = a.split('@')[0];
 	var action = a.split('@')[1];
 	var ret = {};
-	sys.logger.log("Action request\n\tPlugin: " + pluginName + "\n\tAction: " + action + "\n\tParameters: " + u.search, "access");
+	sys.logger.log("argent - Action request - Plugin: " + pluginName + ", Action: " + action + ", Parameters: " + u.search, "access");
 	sys.logger.log(JSON.stringify(q), "debug");
 	if (eval("sys.handlers['" + pluginName + "']")) {
 		eval("var handler = sys.handlers['" + pluginName + "']");

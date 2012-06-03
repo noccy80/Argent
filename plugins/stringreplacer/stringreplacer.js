@@ -7,6 +7,7 @@ plugins.stringreplacer = {
 	},
 	
     init:function(){
+		sys.logger.log("stringreplacer.init()", "debug");
 		var config = JSON.parse(sys.fs.readFileSync(this.config.match_file, "UTF-8"));
 		this.config.replacements = config.replacements;
 		this.config.mimetypes = config.mimetypes;
@@ -15,12 +16,14 @@ plugins.stringreplacer = {
     
     receiveRequest:function(r, u, q, res){
 		if (!q.action) {
+			sys.logger.log("stringreplacer.receiveRequest(" + JSON.stringify(r) + ", " + JSON.stringify(u) + ", " + JSON.stringify(q) + ", " + JSON.stringify(res) + ")", "debug");
 			var filename = sys.parseFilename(u.pathname);
 			var mimetype = sys.getMimeType(filename);
 			for (var m in this.config.mimetypes) {
 				if (mimetype == this.config.mimetypes[m]) {
 					var body = sys.fs.readFileSync(filename, "UTF-8");
 					for (var rep in this.config.replacements) {
+						sys.logger.log("stringreplacer matched '" + rep + "'", "debug");
 						body = body.replace("%" + rep + "%", eval(this.config.replacements[rep]));
 					}
 					sys.respond(res, 200, mimetype, body, {});
