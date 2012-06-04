@@ -21,7 +21,7 @@ plugins.blacklist = {
 
 	receiveRequest:function(r, u, q, res){
 		var inList = false;
-		if (r.connecton.remoteAddress in sys.toObject(this.config.list))
+		if (r.connection.remoteAddress in sys.toObject(this.config.list))
 			inList = true;
 
 		if (inList) {

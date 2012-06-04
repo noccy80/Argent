@@ -16,7 +16,7 @@ plugins.stringreplacer = {
     
     receiveRequest:function(r, u, q, res){
 		if (!q.action) {
-			sys.logger.log("stringreplacer.receiveRequest(" + JSON.stringify(r) + ", " + JSON.stringify(u) + ", " + JSON.stringify(q) + ", " + JSON.stringify(res) + ")", "debug");
+			sys.logger.log("stringreplacer.receiveRequest(" + r + ", " + u + ", " + ", " + res + ")", "debug");
 			var filename = sys.parseFilename(u.pathname);
 			var mimetype = sys.getMimeType(filename);
 			for (var m in this.config.mimetypes) {
