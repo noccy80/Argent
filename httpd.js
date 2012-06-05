@@ -310,7 +310,9 @@ function parseConfigFile(file) {
 }
 
 // Exit sequence
-process.on("SIGINT", function() {
+var TERM_SIGNAL = (process.platform === "win32" ? "CTRL_CLOSE_EVENT" : "SIGINT");
+
+process.on(TERM_SIGNAL, function() {
 	sys.logger.log("Shutting down...", "info");
 	for (var i in plugins)
 		plugins[i].shutdown();
