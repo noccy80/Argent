@@ -18,6 +18,15 @@
 			"timestamp_format":"dMY-H:i:s.u",
 			"separator":" | "
 		},
+		"stderr":{
+			"type":"console",
+			"filters":[
+				{"type":"error", "path":"stderr"}
+			],
+			"default_path":"stderr",
+			"timestamp_format":"dMY-H:i:s.u",
+			"separator":" | "
+		},
 		"html_log":{
 			"type":"html",
 			"filters":[
