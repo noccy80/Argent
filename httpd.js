@@ -37,7 +37,7 @@ sys.logger = {
 		
 		if (message_filter_type in sys.toObject(sys.config.message_filter_types)) {
 			switch (destination) {
-				case "stdin":
+				case "stderr":
 					console.error(sys.logger.now() + " | " + message);
 					break
 				default:
@@ -190,8 +190,8 @@ function handleRequest(request, response) {
 				var body = sys.fs.readFileSync(filename);
 				sys.respond(response, 200, mimetype, body, {'Content-Type': mimetype, 'Content-Length': body.length});
 			} catch (e) {   // Bad file?
-				sys.logger.log(e, "error");
-				sys.logger.log("Error serving request for " + filename, "error");
+				sys.logger.log(JSON.stringify(e), "error", "stderr");
+				sys.logger.log("Error serving request for " + filename, "error", "stderr");
 				if ("e404" in sys.config.error_documents) {
 					var errorFileName = sys.config.document_root + "/" + sys.config.error_documents["e404"];
 					sys.respond(response,
