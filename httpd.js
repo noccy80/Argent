@@ -93,6 +93,10 @@ sys.handleAction = function(r, u, q, response) {
 };
 
 sys.respond = function(response, httpcode, mimetype, body, headers) {
+	if ('e' + httpcode in sys.config.error_documents) {
+		mimetype = sys.config.default_file_mime_type;
+		body = sys.fs.readFileSync(sys.config.document_root + "/" + sys.config.error_documents["e" + httpcode]);
+	}
 	headers["Content-Type"] = mimetype;
 	headers["Content-Length"] = body.length;
 	response.writeHead(httpcode, headers);
@@ -120,7 +124,7 @@ sys.isBinaryType = function(mimetype, table) {
 	return false;
 };
 
-sys.parseFilename = function(filename) {
+sys.parseFilename = function(filename, response) {
 	// Work over the filename to retrieve
 	var fnameParts = filename.split('/');
 	if (fnameParts[fnameParts.length - 1].indexOf('.') == -1) { // There is no . in the filename part of the path
@@ -181,10 +185,10 @@ function handleRequest(request, response) {
 			if (ret != null)
 				sys.respond(response, 200, sys.config.default_action_mime_type, JSON.stringify(ret.response), ret.headers);
 			} else {	// We got no action, unlike your mom
-			filename = sys.parseFilename(filename);
-			mimetype = sys.getMimeType(filename);
-			if (mimetype == null) mimetype = sys.config.default_file_mime_type;
-			sys.logger.log("Request from " + request.connection.remoteAddress + ": " + request.url + " -> " + filename + " (" + mimetype + ")", "access");
+				filename = sys.parseFilename(filename, response);
+				mimetype = sys.getMimeType(filename);
+				if (mimetype == null) mimetype = sys.config.default_file_mime_type;
+				sys.logger.log("Request from " + request.connection.remoteAddress + ": " + request.url + " -> " + filename + " (" + mimetype + ")", "access");
 
 			try {
 				var body = sys.fs.readFileSync(filename);
