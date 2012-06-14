@@ -37,6 +37,6 @@
 		}
 	},
 	"default_destination":"text_log",
-	"default_timestamp_format":"dMY-h:m:s.u",
+	"default_timestamp_format":"dMY-H:i:s.u",
 	"default_separator":" | "
 }

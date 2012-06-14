@@ -27,6 +27,7 @@ plugins.logger = {
     receiveRequest:function(r, u, q, res){return true;},
     
     shutdown:function(){
+		sys.logger.log("[INFO] Logger - shutting down", "info");
 		for (var i in this.config.destinations) {
 			if (typeof(this.config.destinations[i].file) !== "undefined")
 				sys.fs.closeSync(this.config.destinations[i].file);
@@ -208,7 +209,7 @@ plugins.logger = {
 					timestamp[i] = hour.toString();
 					break;
 				case 'G':
-					timestamp[1] = d.getHours().toString();
+					timestamp[i] = d.getHours().toString();
 					break;
 				case 'h':
 					var hour = d.getHours();
