@@ -1,5 +1,9 @@
 # Argent
 
+## Version 0.1
+
+This marks the first "official" release of Argent. It's the first one with a version number. Please check the wiki for lots of information about how to use Argent. If you have questions or comments that just can't be handled by the wiki, email me at gradysghost [at] gmail [dot] com.
+
 ## Introduction
 
 Argent is a web application server built on Node.js. It is modular and designed with extensibility in mind. This software is made available as-is in the hopes that it will be useful to you, but comes with no warranty whatsoever. It is released under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html).
