@@ -136,7 +136,7 @@ sys.parseFilename = function(filename, response) {
 		// If there's still no filename, add the default
 		if (filename.charAt(filename.length - 1) == '/') filename += sys.config.default_file;
 	}
-	return sys.config.document_root + "/" + filename;
+	return ((filename.charAt(0) == '/') ? sys.config.document_root + filename : sys.config.document_root + "/" + filename);
 };
 
 sys.toObject = function(arr) {
